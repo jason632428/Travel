@@ -84,7 +84,7 @@
             background: linear-gradient(180deg, #eef2ff 0%, #fdf2f8 40%, #f0f9ff 100%);
             background-attachment: fixed;
             color: var(--gray-800);
-            padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+            padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -102,8 +102,7 @@
 
         /* ========== Header ========== */
         .app-header {
-            position: sticky;
-            top: 0;
+            position: relative;
             z-index: 100;
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
             color: white;
@@ -214,6 +213,117 @@
             color: var(--gray-700);
         }
 
+        /* ========== Booking Card ========== */
+        .booking-card {
+            margin: 0 16px 16px;
+            padding: 18px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--primary-500);
+            box-shadow: var(--glass-shadow);
+            animation: slideUp 0.55s ease-out both;
+        }
+
+        .booking-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--gray-800);
+            margin-bottom: 14px;
+        }
+
+        .booking-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .booking-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .booking-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            line-height: 1.4;
+        }
+
+        .booking-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .booking-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 4px;
+        }
+
+        .booking-name .booking-code {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--primary-600);
+            margin-left: 6px;
+        }
+
+        .booking-route {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            margin: 6px 0 4px;
+            flex-wrap: wrap;
+        }
+
+        .booking-route .time {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--gray-900);
+        }
+
+        .booking-route .arrow {
+            color: var(--gray-400);
+        }
+
+        .booking-route .dur {
+            font-size: 0.72rem;
+            color: var(--gray-400);
+        }
+
+        .booking-meta {
+            font-size: 0.76rem;
+            color: var(--gray-500);
+            line-height: 1.6;
+        }
+
+        .booking-date {
+            display: inline-block;
+            font-family: var(--font-display);
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--primary-700);
+            background: var(--primary-100);
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        @media (min-width: 640px) {
+            .booking-card {
+                max-width: 560px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
         /* ========== Day Card ========== */
         .day-card {
             background: var(--glass-bg);
@@ -222,6 +332,7 @@
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-lg);
             overflow: hidden;
+            scroll-margin-top: 96px;
             box-shadow: var(--glass-shadow);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                         box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -306,12 +417,45 @@
         }
 
         .day-card-body.expanded {
-            max-height: 600px;
+            max-height: 900px;
             opacity: 1;
         }
 
         .day-card-body-inner {
             padding: 2px 16px 18px;
+        }
+
+        /* ========== Day → Map link button ========== */
+        .day-map-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 14px;
+            margin-left: 30px;
+            padding: 7px 14px;
+            font-family: var(--font-sans);
+            font-size: 0.76rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1.5px solid currentColor;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .day-map-link:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-1px);
+        }
+
+        .day-map-link:active {
+            transform: scale(0.96);
+        }
+
+        .day-map-link svg {
+            width: 14px;
+            height: 14px;
         }
 
         /* ========== Timeline Items ========== */
@@ -371,94 +515,110 @@
             line-height: 1.7;
         }
 
-        /* ========== Bottom Navigation ========== */
+        /* ========== Bottom Navigation (floating glass pill) ========== */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: calc(14px + env(safe-area-inset-bottom, 0px));
             z-index: 100;
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-top: 1px solid rgba(0, 0, 0, 0.06);
-            padding-bottom: env(safe-area-inset-bottom, 0px);
+            width: min(92%, 360px);
+            padding: 6px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 999px;
+            box-shadow: 0 16px 44px rgba(31, 38, 135, 0.3),
+                        0 4px 12px rgba(0, 0, 0, 0.06),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            animation: navRise 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        @keyframes navRise {
+            from { opacity: 0; transform: translate(-50%, 30px); }
+            to   { opacity: 1; transform: translate(-50%, 0); }
         }
 
         .nav-container {
             display: flex;
-            justify-content: space-around;
-            align-items: center;
-            height: 62px;
             position: relative;
+            gap: 6px;
+            height: 52px;
         }
 
-        .nav-indicator {
+        /* Sliding gradient highlight behind the active tab */
+        .nav-pill {
             position: absolute;
             top: 0;
-            height: 3px;
-            width: 50%;
-            background: linear-gradient(90deg, var(--primary-500), var(--accent-violet));
-            border-radius: 0 0 4px 4px;
-            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            bottom: 0;
+            left: 0;
+            width: calc(50% - 3px);
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--primary-500), var(--accent-violet) 60%, var(--accent-pink));
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 0;
         }
+        .nav-pill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), transparent 55%);
+        }
+        .nav-pill.right { transform: translateX(calc(100% + 6px)); }
 
         .nav-btn {
+            position: relative;
+            z-index: 1;
+            flex: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex: 1;
+            gap: 8px;
             height: 100%;
             border: none;
             background: none;
             cursor: pointer;
-            transition: color 0.25s ease, transform 0.15s ease;
-            color: var(--gray-400);
+            border-radius: 999px;
+            color: var(--gray-500);
             font-family: var(--font-sans);
+            transition: color 0.3s ease, transform 0.18s ease;
             -webkit-tap-highlight-color: transparent;
         }
 
-        .nav-btn.active {
-            color: var(--primary-600);
-        }
+        .nav-btn.active { color: #fff; }
 
-        .nav-btn:active {
-            transform: scale(0.92);
-        }
+        .nav-btn:active { transform: scale(0.94); }
 
         .nav-btn svg {
-            width: 22px;
-            height: 22px;
-            margin-bottom: 4px;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 21px;
+            height: 21px;
+            flex-shrink: 0;
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .nav-btn.active svg {
-            animation: navBounce 0.45s ease;
-        }
+        .nav-btn.active svg { transform: scale(1.14) rotate(-4deg); }
 
         .nav-btn span {
-            font-size: 0.68rem;
-            font-weight: 600;
+            font-size: 0.78rem;
+            font-weight: 700;
             letter-spacing: 0.3px;
-        }
-
-        @keyframes navBounce {
-            0% { transform: scale(1); }
-            35% { transform: scale(1.22); }
-            65% { transform: scale(0.95); }
-            100% { transform: scale(1); }
+            white-space: nowrap;
         }
 
         /* ========== Full-screen Map ========== */
         .map-fullscreen {
             position: relative;
             width: 100%;
-            /* fill viewport: 100vh minus header (~68px) minus bottom-nav (~62px + safe-area) */
-            height: calc(100vh - 68px - 62px - env(safe-area-inset-bottom, 0px));
+            /* fill from below the header to the viewport bottom; the floating nav overlays it */
+            height: calc(100vh - var(--header-h, 150px));
             overflow: hidden;
         }
+
+        /* Lift Leaflet zoom controls above the floating nav */
+        .leaflet-bottom.leaflet-right { bottom: 88px; }
 
         #map {
             height: 100%;
@@ -483,6 +643,56 @@
             box-shadow: 0 2px 12px rgba(0,0,0,0.1);
             pointer-events: none;
             white-space: nowrap;
+        }
+
+        /* Day color legend on map */
+        .map-legend {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 20;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+            border: 1px solid var(--glass-border);
+            padding: 10px 12px;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            max-width: 132px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.66rem;
+            color: var(--gray-600);
+            line-height: 1.2;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .legend-item:hover {
+            opacity: 0.65;
+        }
+
+        .legend-dot {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1.5px solid #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+            color: #fff;
+            font-size: 8px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
         }
 
         /* Fit-all button on map */
@@ -519,32 +729,42 @@
         /* ========== Bottom Sheet (Transport) ========== */
         .bottom-sheet-overlay {
             position: absolute;
-            bottom: 0;
+            bottom: calc(94px + env(safe-area-inset-bottom, 0px));
             left: 0;
             right: 0;
             z-index: 30;
+            padding: 0 12px;
             pointer-events: none;
         }
 
+        /* Anchored at its bottom (above the nav); collapse/expand animates height
+           so the card always stays clear of the floating nav. */
         .bottom-sheet {
             pointer-events: auto;
-            background: rgba(255, 255, 255, 0.94);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.12);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            max-height: 70vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 22px;
+            box-shadow: 0 16px 44px rgba(31, 38, 135, 0.28),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
+        /* Hidden until opened from the top-right transport button */
         .bottom-sheet.collapsed {
-            transform: translateY(calc(100% - 82px));
+            max-height: 0;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(12px);
         }
-
         .bottom-sheet.expanded {
+            max-height: 60vh;
+            opacity: 1;
             transform: translateY(0);
         }
 
@@ -726,7 +946,209 @@
             .bottom-sheet {
                 max-width: 480px;
                 margin: 0 auto;
-                border-radius: 20px 20px 0 0;
+                border-radius: 22px;
+            }
+        }
+        /* ========== Dark Mode ========== */
+        body.dark {
+            --gray-50: #0f172a; --gray-100: #1e293b; --gray-200: #334155;
+            --gray-300: #475569; --gray-400: #64748b; --gray-500: #94a3b8;
+            --gray-600: #cbd5e1; --gray-700: #e2e8f0; --gray-800: #f1f5f9; --gray-900: #f8fafc;
+            --glass-bg: rgba(30, 41, 59, 0.72);
+            --glass-border: rgba(148, 163, 184, 0.18);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b2e 45%, #0c1a2b 100%);
+            color: var(--gray-800);
+        }
+
+        body.dark .bottom-nav { background: rgba(15, 23, 42, 0.9); border-top-color: rgba(255, 255, 255, 0.08); }
+        body.dark .map-hint,
+        body.dark .map-legend,
+        body.dark .map-fit-btn { background: rgba(30, 41, 59, 0.92); color: var(--gray-600); }
+        body.dark .bottom-sheet { background: rgba(30, 41, 59, 0.96); }
+        body.dark .booking-item,
+        body.dark .day-extra,
+        body.dark .date-pill,
+        body.dark .trip-search { background: rgba(255, 255, 255, 0.05); }
+        body.dark .day-map-link { background: rgba(255, 255, 255, 0.06); }
+        body.dark .transport-green { background: linear-gradient(135deg, #0c2a22, #0f3d2e); color: #a7f3d0; }
+        body.dark .transport-blue  { background: linear-gradient(135deg, #0c2236, #10314f); color: #bfdbfe; }
+        body.dark .transport-orange{ background: linear-gradient(135deg, #2a1606, #3d250f); color: #fed7aa; }
+        /* Dark map tiles (markers live in a separate pane, unaffected) */
+        body.dark #map .leaflet-tile-pane {
+            filter: brightness(0.72) invert(1) contrast(0.9) hue-rotate(180deg) saturate(0.7);
+        }
+
+        /* ========== Theme Toggle ========== */
+        .theme-toggle {
+            position: absolute;
+            top: 16px;
+            right: 14px;
+            z-index: 2;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(6px);
+            transition: transform 0.15s ease, background 0.2s ease;
+        }
+        .theme-toggle:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.08); }
+        .theme-toggle:active { transform: scale(0.92); }
+        .theme-toggle svg { width: 20px; height: 20px; }
+
+        /* ========== Trip Status Chip ========== */
+        .trip-status {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ========== Sticky Toolbar (search + date strip) ========== */
+        .trip-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 10px 0 9px;
+        }
+
+        .trip-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 16px 10px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 999px;
+        }
+        .trip-search svg { width: 16px; height: 16px; color: var(--gray-400); flex-shrink: 0; }
+        .trip-search input {
+            border: none; background: none; outline: none;
+            font-family: var(--font-sans); font-size: 0.85rem;
+            color: var(--gray-800); width: 100%;
+        }
+        .trip-search input::placeholder { color: var(--gray-400); }
+        .trip-search .clear-btn {
+            border: none; background: none; cursor: pointer;
+            color: var(--gray-400); font-size: 1rem; line-height: 1;
+            display: none; padding: 0 2px;
+        }
+        .trip-search.has-text .clear-btn { display: block; }
+
+        .date-strip {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 2px 16px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .date-strip::-webkit-scrollbar { display: none; }
+        .date-pill {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            padding: 6px 9px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.55);
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.2s ease;
+        }
+        .date-pill:hover { transform: translateY(-2px); }
+        .date-pill:active { transform: scale(0.95); }
+        .date-pill .dp-day {
+            font-family: var(--font-display);
+            font-size: 0.58rem; font-weight: 700;
+            letter-spacing: 1px; opacity: 0.5;
+        }
+        .date-pill .dp-date { font-size: 0.82rem; font-weight: 800; color: var(--gray-800); }
+        .date-pill.today { border-color: currentColor; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .date-pill.today .dp-day { opacity: 0.9; }
+
+        /* ========== Today Badge ========== */
+        .today-badge {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+        /* ========== Day Extra (meal / budget) ========== */
+        .day-extra {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            margin: 2px 0 14px 30px;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .day-extra .chip {
+            display: flex; align-items: center; gap: 5px;
+            font-size: 0.75rem; color: var(--gray-600);
+        }
+        .day-extra .chip b { color: var(--gray-800); font-weight: 700; }
+
+        /* ========== Flight Timeline (booking card) ========== */
+        .flight-tl { display: flex; align-items: center; gap: 12px; margin: 8px 0 6px; }
+        .flight-tl .ep { text-align: center; }
+        .flight-tl .ep .t {
+            font-family: var(--font-display);
+            font-weight: 800; font-size: 1.15rem;
+            color: var(--gray-900); line-height: 1;
+        }
+        .flight-tl .ep .a { font-size: 0.66rem; color: var(--gray-500); margin-top: 4px; white-space: nowrap; }
+        .flight-tl .mid { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .flight-tl .mid .dur { font-size: 0.62rem; color: var(--gray-400); margin-bottom: 3px; }
+        .flight-tl .line { position: relative; width: 100%; height: 2px; background: var(--gray-300); border-radius: 2px; }
+        .flight-tl .line::after {
+            content: '✈'; position: absolute; right: -3px; top: -9px;
+            font-size: 0.8rem; color: var(--primary-500);
+        }
+
+        /* ========== Stacked map buttons ========== */
+        .map-fit-btn.second { top: 58px; }
+        .map-fit-btn.third { top: 104px; }
+        .map-fit-btn.is-on {
+            background: linear-gradient(135deg, var(--primary-500), var(--accent-violet));
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5);
+        }
+
+        @media (min-width: 640px) {
+            .trip-search, .date-strip {
+                max-width: 560px;
+                margin-left: auto;
+                margin-right: auto;
             }
         }
     </style>
@@ -735,22 +1157,93 @@
 <body>
     <!-- ========== Header ========== -->
     <header class="app-header">
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="切換深色／淺色" aria-label="切換深色／淺色模式">
+            <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.2" y1="4.2" x2="5.6" y2="5.6"></line><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.2" y1="19.8" x2="5.6" y2="18.4"></line><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"></line>
+            </svg>
+        </button>
         <h1 class="header-title">
-            <span class="icon-plane">✈️</span> 家族東京 8 日遊
+            <span class="icon-plane">✈️</span> 家族東京 9 日遊
         </h1>
         <p class="header-subtitle">跨世代旅行 ── 景點 · 美食 · 回憶</p>
+        <div class="trip-status" id="trip-status"></div>
     </header>
 
     <!-- ========== Itinerary View ========== -->
     <main id="view-itinerary" class="view active">
+        <!-- Sticky toolbar: search + quick day jump -->
+        <div class="trip-toolbar">
+            <div class="trip-search" id="trip-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="search-input" placeholder="搜尋景點、地名或行程…" autocomplete="off">
+                <button class="clear-btn" id="search-clear" onclick="clearSearch()" aria-label="清除搜尋">✕</button>
+            </div>
+            <div class="date-strip" id="date-strip"></div>
+        </div>
+
         <!-- Memo -->
         <div class="memo-card" role="note">
             <div class="memo-title">💡 旅途重要備忘錄</div>
             <ul class="memo-list">
                 <li><strong>餐飲：</strong>優先選「百貨美食街」，避開街邊排隊名店，長輩才有位子坐。</li>
                 <li><strong>彈性分流：</strong>長輩隨時可於咖啡廳休息，年輕人自由去逛街探索。</li>
+<<<<<<< HEAD
+                <li><strong>分區動線：</strong>前半段（8/18–21）以淺草飯店為據點玩東京市區，後半段（8/22–24）往南玩橫濱・鎌倉・川崎。</li>
+                <li><strong>住宿安排：</strong>8/17–22 淺草 → 8/22–24 品川／橫濱（2晚，方便南部行程）→ 8/24–25 千葉（1晚，靠近成田機場方便隔日搭機）。</li>
+                <li><strong>需先預約：</strong>藤子・F・不二雄博物館（哆啦A夢）採事前購票制；Shibuya Sky 建議線上預約時段。</li>
+                <li><strong>鎌倉省力：</strong>搭 JR 橫須賀線務必加購「綠色車廂券」直達，長輩免人擠人。</li>
+=======
                 <li><strong>鎌倉兩日：</strong>景點豐富故安排兩天，Day 4 古都寺廟、Day 5 海線江之島，體力分散更舒適。</li>
+>>>>>>> 82f79ad08fc5c0a9d827050ab53e6400c765ea43
             </ul>
+        </div>
+
+        <!-- Confirmed Bookings -->
+        <div class="booking-card" role="note">
+            <div class="booking-title">🎫 已預訂資訊</div>
+
+            <div class="booking-item">
+                <div class="booking-icon">✈️</div>
+                <div class="booking-body">
+                    <span class="booking-date">8/17 (一)</span>
+                    <div class="booking-name">長榮航空<span class="booking-code">BR196</span></div>
+                    <div class="flight-tl">
+                        <div class="ep"><div class="t">15:20</div><div class="a">TPE · T2</div></div>
+                        <div class="mid"><div class="dur">3h20m</div><div class="line"></div></div>
+                        <div class="ep"><div class="t">19:40</div><div class="a">NRT · T1</div></div>
+                    </div>
+                    <div class="booking-meta">桃園國際機場 → 成田機場</div>
+                </div>
+            </div>
+
+            <div class="booking-item">
+                <div class="booking-icon">🏨</div>
+                <div class="booking-body">
+                    <span class="booking-date">8/17 – 8/22</span>
+                    <div class="booking-name">格拉斯麗淺草酒店</div>
+                    <div class="booking-meta">2026-08-17 至 2026-08-22（5晚）・雙床房</div>
+                </div>
+            </div>
+
+            <div class="booking-item">
+                <div class="booking-icon">✈️</div>
+                <div class="booking-body">
+                    <span class="booking-date">8/25 (二)</span>
+                    <div class="booking-name">長榮航空<span class="booking-code">BR197</span></div>
+                    <div class="flight-tl">
+                        <div class="ep"><div class="t">14:25</div><div class="a">NRT · T1</div></div>
+                        <div class="mid"><div class="dur">3h40m</div><div class="line"></div></div>
+                        <div class="ep"><div class="t">17:05</div><div class="a">TPE · T2</div></div>
+                    </div>
+                    <div class="booking-meta">成田機場 → 桃園國際機場</div>
+                </div>
+            </div>
         </div>
 
         <!-- Itinerary Cards -->
@@ -764,7 +1257,10 @@
             <div id="map"></div>
 
             <!-- Floating hint -->
-            <div class="map-hint">📍 點擊標記查看景點・紅色為住宿推薦</div>
+            <div class="map-hint">📍 標記的顏色與編號對應每日行程</div>
+
+            <!-- Day color legend -->
+            <div class="map-legend" id="map-legend"></div>
 
             <!-- Fit-all button -->
             <button class="map-fit-btn" id="btn-fit-all" onclick="fitAllMarkers()" title="顯示全部景點">
@@ -773,6 +1269,26 @@
                     <polyline points="9 21 3 21 3 15"></polyline>
                     <line x1="21" y1="3" x2="14" y2="10"></line>
                     <line x1="3" y1="21" x2="10" y2="14"></line>
+                </svg>
+            </button>
+
+            <!-- Toggle daily route lines -->
+            <button class="map-fit-btn second" id="btn-routes" onclick="toggleRoutes()" title="顯示／隱藏每日路線">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="6" cy="19" r="2"></circle>
+                    <circle cx="18" cy="5" r="2"></circle>
+                    <path d="M8 18.5h6a3.5 3.5 0 000-7H10a3.5 3.5 0 010-7h6" stroke-dasharray="3 2"></path>
+                </svg>
+            </button>
+
+            <!-- Open transport tips (top-right icon) -->
+            <button class="map-fit-btn third" id="btn-transport" onclick="toggleSheet()" title="交通攻略">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="3" width="14" height="13" rx="3"></rect>
+                    <path d="M5 11h14"></path>
+                    <path d="M8.5 20l-1.5 1.5M15.5 20l1.5 1.5"></path>
+                    <circle cx="9" cy="13.5" r="1"></circle>
+                    <circle cx="15" cy="13.5" r="1"></circle>
                 </svg>
             </button>
 
@@ -791,12 +1307,20 @@
                     <div class="sheet-content">
                         <div class="transport-items">
                             <div class="transport-item transport-green">
-                                <h3>🟢 鎌倉無痛直達法 (Green Car)</h3>
-                                <p>從「品川」或「東京」搭乘 JR 橫須賀線，<strong>務必在月台售票機加購「綠色車廂券 (Green Car)」</strong>，並刷西瓜卡登記。座位舒適可傾斜，長輩不需人擠人，直達鎌倉保留體力。</p>
+                                <h3>✈️ 機場往返 (Day 1 / Day 9)</h3>
+                                <p><strong>去程 8/17：</strong>成田 T1 → 淺草，搭京成 Skyliner（轉乘）或利木津巴士直達飯店，約 60–75 分。<br><strong>回程 8/25：</strong>住千葉，距成田僅 30–60 分，從容搭 14:25 的 BR197。</p>
+                            </div>
+                            <div class="transport-item transport-orange">
+                                <h3>🏨 三段換宿與行李 (Day 6 / Day 8)</h3>
+                                <p><strong>8/22</strong> 淺草退房 → 川崎順遊 → 入住品川／橫濱；<strong>8/24</strong> 橫濱半日後提早移動千葉。<br>建議大件行李用<strong>宅配便 (takkyubin)</strong> 直送下一站飯店，當天輕裝玩更省力。</p>
+                            </div>
+                            <div class="transport-item transport-green">
+                                <h3>🟢 鎌倉無痛直達法 (Day 7)</h3>
+                                <p>從「品川」或「橫濱」搭乘 JR 橫須賀線，<strong>務必在月台售票機加購「綠色車廂券 (Green Car)」</strong>，並刷西瓜卡登記。座位舒適可傾斜，長輩不需人擠人，直達鎌倉保留體力。</p>
                             </div>
                             <div class="transport-item transport-blue">
-                                <h3>⭕ 山手線與地下鐵原則</h3>
-                                <p>市區移動盡量依賴 <strong>JR 山手線</strong>，因為大型車站的電梯與無障礙設施最完善。轉乘地下鐵時，若看到長樓梯，請多花 3 分鐘尋找電梯標誌（通常在月台頭或尾端）。</p>
+                                <h3>⭕ 市區山手線原則 (Day 2–5)</h3>
+                                <p>市區移動盡量依賴 <strong>JR 山手線</strong>，大型車站的電梯與無障礙設施最完善。轉乘地下鐵時若遇長樓梯，請多花 3 分鐘尋找電梯標誌（通常在月台頭或尾端）。</p>
                             </div>
                             <div class="transport-item transport-orange">
                                 <h3>🚕 短程計程車備案</h3>
@@ -812,7 +1336,7 @@
     <!-- ========== Bottom Navigation ========== -->
     <nav class="bottom-nav" role="tablist" aria-label="主選單">
         <div class="nav-container">
-            <div class="nav-indicator" id="nav-indicator" style="left: 0;"></div>
+            <div class="nav-pill" id="nav-pill"></div>
 
             <button onclick="switchTab('itinerary')" id="tab-btn-itinerary" class="nav-btn active" role="tab"
                 aria-selected="true" aria-controls="view-itinerary">
@@ -840,6 +1364,54 @@
     <script>
         // ========== Itinerary Data ==========
         const itinerary = [
+<<<<<<< HEAD
+            { day: 1, date: '8/17 一', title: '抵達東京・入住淺草', meal: '機上餐／淺草便利商店', budget: '¥1,000', items: [
+                { time: '15:20', desc: '長榮 BR196 從桃園 T2 起飛。' },
+                { time: '19:40', desc: '抵達成田機場 T1。搭 Skyliner 或利木津巴士前往淺草（約 60–75 分）。' },
+                { time: '晚上', desc: '入住格拉斯麗淺草酒店。長輩休息調時差，年輕人到附近超市／便利商店採買消夜。' }
+            ]},
+            { day: 2, date: '8/18 二', title: '淺草・上野・晴空塔（飯店周邊，剛到不奔波）', meal: '淺草天丼／晴空塔美食街', budget: '¥4,000', items: [
+                { time: '上午', desc: '淺草寺 — 雷門大燈籠、仲見世通商店街。離飯店近、地勢平坦，最適合第一天暖身。' },
+                { time: '中午', desc: '上野 — 阿美橫丁採買伴手禮、上野公園綠意散步（距淺草僅約 5–10 分）。' },
+                { time: '下午–傍晚', desc: '晴空塔 — 登塔看東京全景，逛 Skytree Town。長輩在展望台咖啡廳休息，年輕人自由逛街。' }
+            ]},
+            { day: 3, date: '8/19 三', title: '原宿・明治神宮・新宿', meal: '新宿百貨美食街／思出横丁串燒', budget: '¥5,000', items: [
+                { time: '上午', desc: '明治神宮 — 森林參道慢慢走，感受神社靜謐。出來逛原宿 Kiddy Land（三麗鷗、吉卜力周邊）。' },
+                { time: '下午', desc: '搭山手線到新宿（約 5 分）。新宿御苑廣闊日式庭園散步、迪士尼旗艦店採購。' },
+                { time: '傍晚', desc: '東京都廳免費展望台看夕陽夜景；思出横丁串燒居酒屋晚餐。' }
+            ]},
+            { day: 4, date: '8/20 四', title: '澀谷潮流與雲端夜景', meal: '澀谷美食街／のんべい横丁居酒屋', budget: '¥5,000', items: [
+                { time: '上午', desc: '忠犬八公像、澀谷十字路口拍照。逛澀谷 109、丸井百貨、Parco（任天堂旗艦店）。' },
+                { time: '下午', desc: '宮下公園（商場＋頂樓公園）。Shibuya Sky 230m 露天展望台，建議日落前入場銜接夜景；長輩可於室內沙發區休息。' },
+                { time: '晚上', desc: 'のんべい横丁 — 車站旁昭和風小酒館街，年輕人探索；長輩可先搭車回飯店。' }
+            ]},
+            { day: 5, date: '8/21 五', title: '日本橋・銀座・東京鐵塔（淺草最後一天）', meal: '銀座百貨美食街／貴婦下午茶', budget: '¥6,000', items: [
+                { time: '上午', desc: '寶可夢中心 Tokyo DX（日本橋／東京站周邊）— 寶可夢迷必訪。' },
+                { time: '下午', desc: '銀座 — 高級百貨購物、貴婦下午茶（推薦百貨美食街，長輩有位子坐）。' },
+                { time: '傍晚', desc: '東京鐵塔 — 經典紅色地標夜景。回飯店整理行李，明日退房南下。' }
+            ]},
+            { day: 6, date: '8/22 六', title: '川崎（退房南下，順路停點）', meal: 'LA CITTADELLA 美食街', budget: '¥4,000', items: [
+                { time: '上午', desc: '淺草飯店退房。前往生田綠地：藤子・F・不二雄博物館（哆啦A夢，需事前購票）。' },
+                { time: '中午', desc: '日本民家園 — 緊鄰博物館的生田綠地內，傳統古民家野外博物館，步行可達。' },
+                { time: '下午–傍晚', desc: '移動至川崎站一帶：LA CITTADELLA 義式商街、川崎大師（平間寺）參拜消災。入住品川／橫濱一帶飯店（2晚）。' }
+            ]},
+            { day: 7, date: '8/23 日', title: '鎌倉古都・江之島海線', meal: '小町通小吃／江之島海鮮丼', budget: '¥4,500', items: [
+                { time: '上午', desc: '搭 JR 橫須賀線（加購綠色車廂直達省力）。鶴岡八幡宮參拜、小町通商店街吃喝。' },
+                { time: '中午', desc: '報國寺 — 幽靜竹林庭園品抹茶靜心。' },
+                { time: '下午', desc: '高德院鎌倉大佛、長谷寺眺望湘南海景。' },
+                { time: '傍晚', desc: '鎌倉高校前平交道（灌籃高手場景）、搭江之電海線到江之島看夕陽。長輩可搭電扶梯上山。' }
+            ]},
+            { day: 8, date: '8/24 一', title: '橫濱半日・移動千葉（輕鬆收尾）', meal: '橫濱中華街道地料理', budget: '¥4,000', items: [
+                { time: '上午', desc: '橫濱紅磚倉庫 — 海景文創商場散步拍照，關內歐風街區順遊。' },
+                { time: '中午', desc: '橫濱中華街 — 日本最大中華街，道地午餐，包子小吃邊走邊吃。' },
+                { time: '下午', desc: '提早搭車前往千葉入住、放行李（避開傍晚拉行李的長途奔波）。' },
+                { time: '傍晚', desc: '千葉當地輕鬆晚餐與採買（永旺夢樂城等大型商場），早點休息，準備隔日搭機。' }
+            ]},
+            { day: 9, date: '8/25 二', title: '滿載而歸', meal: '機場／機上餐', budget: '¥2,000', items: [
+                { time: '上午', desc: '千葉飯店退房。最後採買：藥妝補貨、超市買伴手禮（千葉距成田近，車程約 30–60 分，較從市區從容）。建議 11:30 前出發前往成田機場。' },
+                { time: '14:25', desc: '長榮 BR197 從成田 T1 起飛。' },
+                { time: '17:05', desc: '抵達桃園 T2，帶著滿滿回憶回家！' }
+=======
             { day: 1, title: '抵達東京，輕鬆安頓', items: [
                 { time: '晚上', desc: '抵達日本，辦理入住。長輩休息，年輕人到附近超市採買消夜零食。' }
             ]},
@@ -871,13 +1443,43 @@
             { day: 8, title: '滿載而歸', items: [
                 { time: '上午', desc: '飯店周邊最後採買 — 藥妝店補貨、超市買伴手禮。' },
                 { time: '下午', desc: '搭機返台，帶著滿滿回憶回家！' }
+>>>>>>> 82f79ad08fc5c0a9d827050ab53e6400c765ea43
             ]}
         ];
 
         const dayColors = [
             '#f43f5e', '#f97316', '#eab308', '#22c55e',
-            '#06b6d4', '#6366f1', '#a855f7', '#ec4899'
+            '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#0ea5e9'
         ];
+
+        // ========== Trip Date Helpers ==========
+        // Day 1 = 2026-08-17 … Day 9 = 2026-08-25
+        const tripDayDate = (day) => new Date(2026, 7, 16 + day);
+        const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+        function getTodayDayNumber() {
+            const today = midnight(new Date()).getTime();
+            for (let d = 1; d <= 9; d++) {
+                if (tripDayDate(d).getTime() === today) return d;
+            }
+            return null;
+        }
+        const todayDay = getTodayDayNumber();
+
+        function updateTripStatus() {
+            const el = document.getElementById('trip-status');
+            if (!el) return;
+            const today = midnight(new Date());
+            const start = tripDayDate(1), end = tripDayDate(9);
+            if (todayDay) {
+                el.textContent = `🗓️ 旅程進行中 · 今天是 Day ${todayDay}`;
+            } else if (today < start) {
+                const days = Math.round((start - today) / 86400000);
+                el.textContent = `⏳ 距出發還有 ${days} 天`;
+            } else {
+                el.textContent = '✅ 旅程已結束 · 期待下次旅行';
+            }
+        }
 
         // ========== Render Itinerary Cards ==========
         const container = document.getElementById('itinerary-container');
@@ -894,9 +1496,32 @@
                 </div>
             `).join('');
 
+            // Days that have map points (2–8) get a cross-link to the map
+            const hasMap = day.day >= 2 && day.day <= 8;
+            const mapLinkHtml = hasMap ? `
+                <button class="day-map-link" style="color:${color}" onclick="viewDayOnMap(${day.day})">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    在地圖查看這天
+                </button>
+            ` : '';
+
+            // Today badge & meal/budget row
+            const isToday = todayDay === day.day;
+            const todayBadge = isToday ? '<span class="today-badge">今天</span>' : '';
+            const extraHtml = day.meal ? `
+                <div class="day-extra">
+                    <div class="chip">🍽️ <b>${day.meal}</b></div>
+                    <div class="chip">💴 每人約 <b>${day.budget}</b></div>
+                </div>
+            ` : '';
+
             // Create card element
             const card = document.createElement('div');
             card.className = 'day-card';
+            card.id = `day-card-${index}`;
             card.style.animationDelay = `${0.1 + index * 0.08}s`;
             card.style.borderLeft = `4px solid ${color}`;
 
@@ -910,7 +1535,7 @@
                      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleDetails(${index})}">
                     <div class="day-number" style="color: ${color};">${day.day}</div>
                     <div class="day-info">
-                        <div class="day-label">DAY ${day.day}</div>
+                        <div class="day-label">DAY ${day.day}${day.date ? ' · ' + day.date : ''}${todayBadge}</div>
                         <div class="day-title">${day.title}</div>
                     </div>
                     <svg class="day-chevron" id="icon-${index}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -919,7 +1544,9 @@
                 </div>
                 <div class="day-card-body" id="details-${index}" role="region">
                     <div class="day-card-body-inner">
+                        ${extraHtml}
                         <div class="timeline">${itemsHtml}</div>
+                        ${mapLinkHtml}
                     </div>
                 </div>
             `;
@@ -927,28 +1554,61 @@
             container.appendChild(card);
         });
 
-        // Default: expand first 2 days with slight delay for animation
-        setTimeout(() => {
-            toggleDetails(0);
-            toggleDetails(1);
-        }, 150);
-
-        // ========== Toggle Collapse ==========
-        function toggleDetails(index) {
+        // ========== Toggle Collapse (height = content, no fixed max) ==========
+        function toggleDetails(index, skipSave) {
             const body = document.getElementById(`details-${index}`);
             const icon = document.getElementById(`icon-${index}`);
             const header = icon.closest('.day-card-header');
-            const isExpanded = body.classList.contains('expanded');
+            const willExpand = !body.classList.contains('expanded');
 
-            body.classList.toggle('expanded');
-            icon.classList.toggle('open');
-            header.setAttribute('aria-expanded', String(!isExpanded));
+            if (willExpand) {
+                body.classList.add('expanded');
+                body.style.maxHeight = body.scrollHeight + 'px';
+            } else {
+                // set explicit height first so the transition to 0 animates
+                body.style.maxHeight = body.scrollHeight + 'px';
+                requestAnimationFrame(() => {
+                    body.classList.remove('expanded');
+                    body.style.maxHeight = '';
+                });
+            }
+            icon.classList.toggle('open', willExpand);
+            header.setAttribute('aria-expanded', String(willExpand));
+            if (!skipSave) saveExpanded();
         }
+
+        // Recalculate an open card's height (e.g. after content/layout changes)
+        function refreshExpandedHeights() {
+            itinerary.forEach((d, i) => {
+                const body = document.getElementById(`details-${i}`);
+                if (body && body.classList.contains('expanded')) {
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                }
+            });
+        }
+        window.addEventListener('resize', refreshExpandedHeights);
+
+        // ========== Restore / default expanded state ==========
+        (function initExpanded() {
+            const s = loadState();
+            let toOpen;
+            if (Array.isArray(s.expanded)) toOpen = s.expanded;
+            else if (todayDay) toOpen = [todayDay - 1];
+            else toOpen = [0, 1];
+            setTimeout(() => {
+                toOpen.forEach(i => {
+                    const body = document.getElementById(`details-${i}`);
+                    if (body && !body.classList.contains('expanded')) toggleDetails(i, true);
+                });
+            }, 150);
+        })();
 
         // ========== Tab Switching ==========
         let mapInitialized = false;
         let map;
         let allMarkers = [];
+        let routeLayer = null;
+        let routesVisible = true;
 
         function switchTab(tab) {
             // Toggle views
@@ -959,18 +1619,22 @@
             // Body scroll control for map fullscreen
             document.body.classList.toggle('view-map-active', tab === 'map');
 
+            // The map view is fixed-height; the page must sit at the top or the
+            // map/header end up offset by the itinerary's leftover scroll position.
+            if (tab === 'map') window.scrollTo(0, 0);
+
             // Toggle button states
             const btnItinerary = document.getElementById('tab-btn-itinerary');
             const btnMap = document.getElementById('tab-btn-map');
-            const indicator = document.getElementById('nav-indicator');
+            const pill = document.getElementById('nav-pill');
 
             btnItinerary.classList.toggle('active', tab === 'itinerary');
             btnMap.classList.toggle('active', tab === 'map');
             btnItinerary.setAttribute('aria-selected', String(tab === 'itinerary'));
             btnMap.setAttribute('aria-selected', String(tab === 'map'));
 
-            // Slide the indicator
-            indicator.style.left = tab === 'itinerary' ? '0' : '50%';
+            // Slide the gradient pill to the active tab
+            pill.classList.toggle('right', tab === 'map');
 
             // Lazy-init map
             if (tab === 'map') {
@@ -980,13 +1644,24 @@
                     setTimeout(() => map.invalidateSize(), 60);
                 }
             }
+            saveState({ tab });
+        }
+
+        // ========== Cross-link: itinerary → map ==========
+        function viewDayOnMap(day) {
+            switchTab('map');
+            // wait long enough for lazy map init (switchTab inits at ~120ms)
+            const delay = mapInitialized ? 220 : 420;
+            setTimeout(() => zoomToDay(day), delay);
         }
 
         // ========== Bottom Sheet ==========
         function toggleSheet() {
             const sheet = document.getElementById('transport-sheet');
             sheet.classList.toggle('collapsed');
-            sheet.classList.toggle('expanded');
+            const open = sheet.classList.toggle('expanded');
+            const btn = document.getElementById('btn-transport');
+            if (btn) btn.classList.toggle('is-on', open);
         }
 
         // Touch drag support for bottom sheet
@@ -1031,6 +1706,26 @@
             map.fitBounds(group.getBounds().pad(0.08));
         }
 
+        // Toggle the daily route lines on the map
+        function toggleRoutes() {
+            if (!map || !routeLayer) return;
+            routesVisible = !routesVisible;
+            if (routesVisible) routeLayer.addTo(map);
+            else map.removeLayer(routeLayer);
+            const btn = document.getElementById('btn-routes');
+            if (btn) btn.style.opacity = routesVisible ? '1' : '0.45';
+        }
+
+        // Zoom the map to a specific day's markers and open them (legend / cross-link)
+        function zoomToDay(day) {
+            if (!map) return;
+            const dayMarkers = allMarkers.filter(m => m._tripDay === day);
+            if (dayMarkers.length === 0) return;
+            const group = L.featureGroup(dayMarkers);
+            map.fitBounds(group.getBounds().pad(0.3), { maxZoom: 15 });
+            dayMarkers[0].openPopup();
+        }
+
         // ========== Leaflet Map ==========
         function initMap() {
             map = L.map('map', {
@@ -1044,13 +1739,68 @@
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(map);
 
-            const redIcon = new L.Icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-            });
+            // 依行程天數產生對應顏色＋編號的標記（與行程總覽卡片同色系）
+            function makeDayIcon(day) {
+                const color = dayColors[day - 1] || 'var(--primary-500)';
+                return L.divIcon({
+                    className: 'day-marker',
+                    html: `<div style="background:${color};width:28px;height:28px;border-radius:50% 50% 50% 0;` +
+                          `transform:rotate(-45deg);border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.35);` +
+                          `display:flex;align-items:center;justify-content:center;">` +
+                          `<span style="transform:rotate(45deg);color:#fff;font-weight:800;font-size:13px;` +
+                          `font-family:'Inter',sans-serif;line-height:1;">${day}</span></div>`,
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 28],
+                    popupAnchor: [0, -28]
+                });
+            }
 
+            // 每個景點標上對應的行程天數 (day)，標記顏色／編號與「行程總覽」卡片一致
             const locations = [
+<<<<<<< HEAD
+                // DAY 2 (8/18) 淺草・上野・晴空塔
+                { name: '淺草寺', lat: 35.7147, lng: 139.7966, day: 2, desc: '雷門大燈籠與仲見世通商店街' },
+                { name: '上野公園', lat: 35.7146, lng: 139.7734, day: 2, desc: '廣大綠地，適合散步賞景' },
+                { name: '晴空塔', lat: 35.7100, lng: 139.8107, day: 2, desc: '東京地標，可俯瞰市區全景' },
+                // DAY 3 (8/19) 原宿・明治神宮・新宿
+                { name: '明治神宮', lat: 35.6763, lng: 139.6993, day: 3, desc: '都市中的廣闊森林與神聖氛圍' },
+                { name: 'Kiddy Land', lat: 35.6696, lng: 139.7047, day: 3, desc: '原宿知名玩具與動漫雜貨旗艦店' },
+                { name: '新宿御苑', lat: 35.6852, lng: 139.7100, day: 3, desc: '絕美廣闊的日式庭園' },
+                { name: '迪士尼旗艦店', lat: 35.6917, lng: 139.7034, day: 3, desc: '日本最大規模的 Disney Flagship Tokyo' },
+                { name: '東京都廳', lat: 35.6896, lng: 139.6917, day: 3, desc: '免費高空展望台，看夜景好去處' },
+                { name: '思出横丁', lat: 35.6923, lng: 139.6995, day: 3, desc: '懷舊的復古串燒居酒屋小巷' },
+                // DAY 4 (8/20) 澀谷
+                { name: '忠犬八公像', lat: 35.6590, lng: 139.7006, day: 4, desc: '澀谷最著名的會面地標' },
+                { name: '十字路口', lat: 35.6595, lng: 139.7000, day: 4, desc: '全世界最繁忙的十字路口' },
+                { name: '澀谷丸井百貨', lat: 35.6612, lng: 139.7005, day: 4, desc: '熱門購物與流行指標' },
+                { name: 'Parco (澀谷)', lat: 35.6622, lng: 139.6987, day: 4, desc: '潮流品牌與任天堂旗艦店所在地' },
+                { name: '宮下公園', lat: 35.6619, lng: 139.7019, day: 4, desc: '結合商場與頂樓公園的複合設施' },
+                { name: 'Shibuya Sky', lat: 35.6595, lng: 139.7005, day: 4, desc: '230公尺高空無死角露天觀景台' },
+                { name: 'のんべい横丁', lat: 35.6602, lng: 139.7014, day: 4, desc: '澀谷車站旁的昭和風小酒館街' },
+                // DAY 5 (8/21) 日本橋・銀座・東京鐵塔
+                { name: '寶可夢中心 (Tokyo DX)', lat: 35.6815, lng: 139.7745, day: 5, desc: '日本橋／東京站周邊，寶可夢愛好者天堂' },
+                { name: '銀座', lat: 35.6712, lng: 139.7665, day: 5, desc: '高級百貨與優雅下午茶' },
+                { name: '東京鐵塔', lat: 35.6586, lng: 139.7454, day: 5, desc: '經典不朽的紅色鐵塔地標' },
+                // DAY 6 (8/22) 川崎（退房南下順遊）
+                { name: '藤子不二雄博物館', lat: 35.6095, lng: 139.5768, day: 6, desc: '哆啦A夢作者的夢幻紀念館（需事前購票）' },
+                { name: '日本民家園', lat: 35.6083, lng: 139.5621, day: 6, desc: '緊鄰博物館的傳統古民家野外博物館' },
+                { name: 'LA CITTADELLA', lat: 35.5312, lng: 139.7032, day: 6, desc: '義大利風情的複合商業街區' },
+                { name: '大師平間寺 (川崎大師)', lat: 35.5340, lng: 139.7300, day: 6, desc: '知名消災解厄佛寺' },
+                // DAY 7 (8/23) 鎌倉・江之島
+                { name: '鶴岡八幡宮', lat: 35.3261, lng: 139.5564, day: 7, desc: '鎌倉最重要的信仰中心' },
+                { name: '小町通商店街', lat: 35.3233, lng: 139.5539, day: 7, desc: '吃喝玩樂通通有的熱鬧老街' },
+                { name: '報國寺 (竹林)', lat: 35.3200, lng: 139.5693, day: 7, desc: '可以在美麗竹林中品味抹茶' },
+                { name: '高德院鎌倉大佛', lat: 35.3167, lng: 139.5360, day: 7, desc: '鎌倉最具代表性的露天大佛' },
+                { name: '鎌倉長谷寺', lat: 35.3118, lng: 139.5318, day: 7, desc: '賞花與眺望海景的絕佳地點' },
+                { name: '高校前平交道', lat: 35.3067, lng: 139.5006, day: 7, desc: '灌籃高手經典名場面' },
+                { name: '海邊火車 (江之電)', lat: 35.3060, lng: 139.5100, day: 7, desc: '緊鄰湘南海岸的美麗復古電車' },
+                { name: '江之島', lat: 35.3000, lng: 139.4806, day: 7, desc: '擁有海景、神社與美食的度假小島' },
+                // DAY 8 (8/24) 橫濱（半日，傍晚移動千葉）
+                { name: '橫濱紅磚倉庫', lat: 35.4526, lng: 139.6429, day: 8, desc: '百年倉庫改建的文創與海景商場' },
+                { name: '橫濱關內', lat: 35.4436, lng: 139.6366, day: 8, desc: '充滿歷史西洋建築的歐風街區' },
+                { name: '橫濱中華街', lat: 35.4430, lng: 139.6465, day: 8, desc: '日本最大的中華街，美食林立' },
+                { name: '拉麵博物館', lat: 35.5064, lng: 139.6148, day: 8, desc: '懷舊拉麵主題樂園（時間有餘可加）' }
+=======
                 // 東京
                 { name: '寶可夢中心 (Tokyo DX)', lat: 35.6815, lng: 139.7745, desc: '東京站周邊，寶可夢愛好者天堂' },
                 { name: '晴空塔', lat: 35.7100, lng: 139.8107, desc: '東京地標，可俯瞰市區全景' },
@@ -1092,21 +1842,62 @@
                 { name: '高德院鎌倉大佛', lat: 35.3167, lng: 139.5360, desc: '鎌倉最具代表性的露天大佛' },
                 { name: '鎌倉長谷寺', lat: 35.3118, lng: 139.5318, desc: '賞花與眺望海景的絕佳地點' },
                 { name: '報國寺 (竹林)', lat: 35.3200, lng: 139.5693, desc: '可以在美麗竹林中品味抹茶' }
+>>>>>>> 82f79ad08fc5c0a9d827050ab53e6400c765ea43
             ];
 
-            locations.forEach(loc => {
-                const marker = L.marker([loc.lat, loc.lng], {
-                    icon: loc.isBase ? redIcon : new L.Icon.Default()
-                }).addTo(map);
+            const dayDates = ['', '8/17', '8/18', '8/19', '8/20', '8/21', '8/22', '8/23', '8/24', '8/25'];
 
+            locations.forEach(loc => {
+                const color = dayColors[loc.day - 1] || 'var(--primary-500)';
+                const marker = L.marker([loc.lat, loc.lng], {
+                    icon: makeDayIcon(loc.day)
+                }).addTo(map);
+                marker._tripDay = loc.day;
+
+                const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
                 marker.bindPopup(
-                    `<div style="font-family:'Noto Sans TC',sans-serif;padding:4px 0">` +
+                    `<div style="font-family:'Noto Sans TC',sans-serif;padding:4px 0;min-width:150px">` +
+                    `<span style="display:inline-block;background:${color};color:#fff;font-size:11px;font-weight:700;` +
+                    `padding:2px 8px;border-radius:5px;margin-bottom:5px;">DAY ${loc.day} · ${dayDates[loc.day]}</span><br>` +
                     `<b style="font-size:14px;color:#1e293b">${loc.name}</b><br>` +
-                    `<span style="color:#64748b;font-size:12px;line-height:1.6">${loc.desc}</span></div>`
+                    `<span style="color:#64748b;font-size:12px;line-height:1.6">${loc.desc}</span><br>` +
+                    `<a href="${navUrl}" target="_blank" rel="noopener" ` +
+                    `style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:5px 12px;` +
+                    `background:${color};color:#fff;font-size:12px;font-weight:700;border-radius:8px;text-decoration:none;">` +
+                    `🧭 Google Maps 導航</a></div>`
                 );
 
                 allMarkers.push(marker);
             });
+
+            // Build day-color legend, linked to itinerary days
+            const legendAreas = {
+                2: '淺草・上野', 3: '原宿・新宿', 4: '澀谷', 5: '銀座・日本橋',
+                6: '川崎', 7: '鎌倉・江之島', 8: '橫濱'
+            };
+            const legend = document.getElementById('map-legend');
+            if (legend) {
+                legend.innerHTML = Object.keys(legendAreas).map(d => {
+                    const color = dayColors[d - 1] || '#6366f1';
+                    return `<div class="legend-item" onclick="zoomToDay(${d})">` +
+                           `<span class="legend-dot" style="background:${color}">${d}</span>` +
+                           `<span>${legendAreas[d]}</span></div>`;
+                }).join('');
+            }
+
+            // Draw a colored route line per day (locations are in visiting order)
+            routeLayer = L.layerGroup().addTo(map);
+            for (let d = 2; d <= 8; d++) {
+                const pts = locations.filter(l => l.day === d).map(l => [l.lat, l.lng]);
+                if (pts.length < 2) continue;
+                L.polyline(pts, {
+                    color: dayColors[d - 1],
+                    weight: 3,
+                    opacity: 0.55,
+                    dashArray: '6 8',
+                    lineJoin: 'round'
+                }).addTo(routeLayer);
+            }
 
             mapInitialized = true;
 
@@ -1120,6 +1911,128 @@
                 }
             }, 3000);
         }
+
+        // ========== Persistent State (localStorage) ==========
+        function loadState() {
+            try { return JSON.parse(localStorage.getItem('tokyo-trip-state-v1')) || {}; }
+            catch (e) { return {}; }
+        }
+        function saveState(patch) {
+            try {
+                const s = loadState();
+                Object.assign(s, patch);
+                localStorage.setItem('tokyo-trip-state-v1', JSON.stringify(s));
+            } catch (e) { /* storage unavailable — ignore */ }
+        }
+        function saveExpanded() {
+            const ex = [];
+            itinerary.forEach((d, i) => {
+                const b = document.getElementById(`details-${i}`);
+                if (b && b.classList.contains('expanded')) ex.push(i);
+            });
+            saveState({ expanded: ex });
+        }
+
+        // ========== Dark / Light Theme ==========
+        const SUN_ICON = `<circle cx="12" cy="12" r="5"></circle>` +
+            `<line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>` +
+            `<line x1="4.2" y1="4.2" x2="5.6" y2="5.6"></line><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"></line>` +
+            `<line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>` +
+            `<line x1="4.2" y1="19.8" x2="5.6" y2="18.4"></line><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"></line>`;
+        const MOON_ICON = `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>`;
+
+        function applyTheme(dark) {
+            document.body.classList.toggle('dark', dark);
+            const ic = document.getElementById('theme-icon');
+            if (ic) ic.innerHTML = dark ? MOON_ICON : SUN_ICON;
+        }
+        function toggleTheme() {
+            const dark = !document.body.classList.contains('dark');
+            applyTheme(dark);
+            saveState({ dark });
+            if (mapInitialized && map) setTimeout(() => map.invalidateSize(), 50);
+        }
+
+        // ========== Date Quick-Jump Strip ==========
+        function buildDateStrip() {
+            const strip = document.getElementById('date-strip');
+            if (!strip) return;
+            strip.innerHTML = itinerary.map((day, i) => {
+                const color = dayColors[i];
+                const dateNum = day.date.split(' ')[0];
+                const isToday = todayDay === day.day;
+                return `<div class="date-pill ${isToday ? 'today' : ''}" style="color:${color}" ` +
+                       `onclick="jumpToDay(${i})" title="${day.title}">` +
+                       `<span class="dp-day">D${day.day}</span><span class="dp-date">${dateNum}</span></div>`;
+            }).join('');
+        }
+        function jumpToDay(index) {
+            switchTab('itinerary');
+            const card = document.getElementById(`day-card-${index}`);
+            const body = document.getElementById(`details-${index}`);
+            if (body && !body.classList.contains('expanded')) toggleDetails(index);
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ========== Search / Filter ==========
+        function filterItinerary(q) {
+            q = (q || '').trim().toLowerCase();
+            const box = document.getElementById('trip-search');
+            if (box) box.classList.toggle('has-text', q.length > 0);
+            itinerary.forEach((day, i) => {
+                const card = document.getElementById(`day-card-${i}`);
+                if (!card) return;
+                const hay = (day.title + ' ' + day.date + ' ' + (day.meal || '') + ' ' +
+                    day.items.map(t => t.desc).join(' ')).toLowerCase();
+                const match = !q || hay.includes(q);
+                card.style.display = match ? '' : 'none';
+                if (q && match) {
+                    const body = document.getElementById(`details-${i}`);
+                    if (body && !body.classList.contains('expanded')) toggleDetails(i, true);
+                }
+            });
+        }
+        function clearSearch() {
+            const inp = document.getElementById('search-input');
+            if (inp) inp.value = '';
+            filterItinerary('');
+        }
+
+        // Keep the map sized correctly below the (variable-height) header
+        function setHeaderHeight() {
+            const h = document.querySelector('.app-header');
+            if (h) document.documentElement.style.setProperty('--header-h', h.offsetHeight + 'px');
+            if (mapInitialized && map) map.invalidateSize();
+        }
+        window.addEventListener('resize', setHeaderHeight);
+
+        // ========== Boot ==========
+        (function boot() {
+            setHeaderHeight();
+            // Theme: saved preference, else follow OS
+            const s = loadState();
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(typeof s.dark === 'boolean' ? s.dark : prefersDark);
+
+            updateTripStatus();
+            buildDateStrip();
+
+            const inp = document.getElementById('search-input');
+            if (inp) inp.addEventListener('input', e => filterItinerary(e.target.value));
+
+            // Restore last tab (map needs lazy init via switchTab)
+            if (s.tab === 'map') switchTab('map');
+
+            // Auto-scroll to today's card during the trip
+            if (todayDay) {
+                setTimeout(() => {
+                    const card = document.getElementById(`day-card-${todayDay - 1}`);
+                    if (card && (!s.tab || s.tab === 'itinerary')) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 500);
+            }
+        })();
     </script>
 </body>
 
