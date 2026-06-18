@@ -701,6 +701,13 @@
             transition: opacity 0.2s;
         }
 
+        /* divider before the 住宿／機場 entries */
+        .legend-item:not(.legend-place) + .legend-place {
+            border-top: 1px solid var(--glass-border);
+            margin-top: 3px;
+            padding-top: 6px;
+        }
+
         .legend-item:hover {
             opacity: 0.65;
         }
@@ -1648,6 +1655,7 @@
             {
                 day: 6, date: '8/22 六', title: '川崎（退房南下，順路停點）', meal: 'LA CITTADELLA 美食街', budget: '¥4,000', items: [
                     { time: '上午', desc: '淺草飯店退房。前往生田綠地：藤子・F・不二雄博物館（哆啦A夢，需事前購票）。' },
+                    { time: '分流', desc: '寶可夢迷可改去 PokéPark KANTO（よみうりランド旁，2026 新開幕的寶可夢樂園，需事前購票）— 與藤子博物館同在多摩丘陵一帶。年輕人玩樂園、長輩走博物館，傍晚於川崎站會合。' },
                     { time: '中午', desc: '日本民家園 — 緊鄰博物館的生田綠地內，傳統古民家野外博物館，步行可達。' },
                     { time: '下午–傍晚', desc: '移動至川崎站一帶：LA CITTADELLA 義式商街、川崎大師（平間寺）參拜消災。入住新橫濱最佳西方菲諾酒店（2晚，川崎到新橫濱約 15 分）。' }
                 ]
@@ -1837,6 +1845,7 @@
         let mapInitialized = false;
         let map;
         let allMarkers = [];
+        let placeMarkers = [];
         let routeLayer = null;
         let routesVisible = true;
 
@@ -1956,6 +1965,16 @@
             dayMarkers[0].openPopup();
         }
 
+        // Focus the hotels / airport markers (legend)
+        function focusPlaces(type) {
+            if (!map) return;
+            const ms = placeMarkers.filter(m => m._placeType === type);
+            if (ms.length === 0) return;
+            const group = L.featureGroup(ms);
+            map.fitBounds(group.getBounds().pad(0.4), { maxZoom: ms.length === 1 ? 12 : 13 });
+            ms[0].openPopup();
+        }
+
         // ========== Leaflet Map ==========
         function initMap() {
             map = L.map('map', {
@@ -1985,6 +2004,19 @@
                 });
             }
 
+            // 住宿／機場用「白底圓形＋emoji」標記，和每日景點的水滴編號區隔
+            function makePlaceIcon(emoji, color) {
+                return L.divIcon({
+                    className: 'place-marker',
+                    html: `<div style="background:#fff;width:32px;height:32px;border-radius:50%;` +
+                        `border:2.5px solid ${color};box-shadow:0 2px 8px rgba(0,0,0,0.35);` +
+                        `display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;">${emoji}</div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16],
+                    popupAnchor: [0, -18]
+                });
+            }
+
             // 每個景點標上對應的行程天數 (day)，標記顏色／編號與「行程總覽」卡片一致
             const locations = [
                 // DAY 2 (8/18) 淺草・上野・晴空塔
@@ -2011,6 +2043,7 @@
                 { name: '銀座', lat: 35.6712, lng: 139.7665, day: 5, desc: '高級百貨與優雅下午茶' },
                 { name: '東京鐵塔', lat: 35.6586, lng: 139.7454, day: 5, desc: '經典不朽的紅色鐵塔地標' },
                 // DAY 6 (8/22) 川崎（退房南下順遊）
+                { name: 'PokéPark KANTO（寶可夢樂園）', lat: 35.6247, lng: 139.5167, day: 6, desc: 'よみうりランド旁，2026 新開幕的寶可夢主題樂園（需事前購票）' },
                 { name: '藤子不二雄博物館', lat: 35.6095, lng: 139.5768, day: 6, desc: '哆啦A夢作者的夢幻紀念館（需事前購票）' },
                 { name: '日本民家園', lat: 35.6083, lng: 139.5621, day: 6, desc: '緊鄰博物館的傳統古民家野外博物館' },
                 { name: 'LA CITTADELLA', lat: 35.5312, lng: 139.7032, day: 6, desc: '義大利風情的複合商業街區' },
@@ -2056,6 +2089,35 @@
                 allMarkers.push(marker);
             });
 
+            // ===== 住宿與機場 =====
+            const HOTEL_COLOR = '#14b8a6', AIRPORT_COLOR = '#64748b';
+            const places = [
+                { name: '格拉斯麗淺草酒店', lat: 35.7118, lng: 139.7966, type: 'hotel', emoji: '🏨', desc: '8/17–8/22 入住（5晚）・淺草' },
+                { name: '新橫濱最佳西方菲諾酒店', lat: 35.5078, lng: 139.6172, type: 'hotel', emoji: '🏨', desc: '8/22–8/24 入住（2晚）・新橫濱' },
+                { name: '相鐵 Fresa Inn 橫濱站東口', lat: 35.4665, lng: 139.6235, type: 'hotel', emoji: '🏨', desc: '8/24–8/25 入住（1晚）・橫濱站東口' },
+                { name: '成田機場 (NRT)', lat: 35.7720, lng: 140.3929, type: 'airport', emoji: '✈️', desc: '8/17 抵達 T1 · 8/25 由此返台' }
+            ];
+
+            places.forEach(p => {
+                const color = p.type === 'airport' ? AIRPORT_COLOR : HOTEL_COLOR;
+                const label = p.type === 'airport' ? '機場' : '住宿';
+                const marker = L.marker([p.lat, p.lng], { icon: makePlaceIcon(p.emoji, color) }).addTo(map);
+                marker._placeType = p.type;
+                const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
+                marker.bindPopup(
+                    `<div style="font-family:'Noto Sans TC',sans-serif;padding:4px 0;min-width:150px">` +
+                    `<span style="display:inline-block;background:${color};color:#fff;font-size:11px;font-weight:700;` +
+                    `padding:2px 8px;border-radius:5px;margin-bottom:5px;">${p.emoji} ${label}</span><br>` +
+                    `<b style="font-size:14px;color:#1e293b">${p.name}</b><br>` +
+                    `<span style="color:#64748b;font-size:12px;line-height:1.6">${p.desc}</span><br>` +
+                    `<a href="${navUrl}" target="_blank" rel="noopener" ` +
+                    `style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:5px 12px;` +
+                    `background:${color};color:#fff;font-size:12px;font-weight:700;border-radius:8px;text-decoration:none;">` +
+                    `🧭 Google Maps 導航</a></div>`
+                );
+                placeMarkers.push(marker);
+            });
+
             // Build day-color legend, linked to itinerary days
             const legendAreas = {
                 2: '淺草・上野', 3: '原宿・新宿', 4: '澀谷', 5: '銀座・日本橋',
@@ -2068,7 +2130,13 @@
                     return `<div class="legend-item" onclick="zoomToDay(${d})">` +
                         `<span class="legend-dot" style="background:${color}">${d}</span>` +
                         `<span>${legendAreas[d]}</span></div>`;
-                }).join('');
+                }).join('') +
+                    `<div class="legend-item legend-place" onclick="focusPlaces('hotel')">` +
+                    `<span class="legend-dot" style="background:#fff;border-color:#14b8a6;font-size:10px">🏨</span>` +
+                    `<span>住宿</span></div>` +
+                    `<div class="legend-item legend-place" onclick="focusPlaces('airport')">` +
+                    `<span class="legend-dot" style="background:#fff;border-color:#64748b;font-size:10px">✈️</span>` +
+                    `<span>機場</span></div>`;
             }
 
             // Draw a colored route line per day (locations are in visiting order)
