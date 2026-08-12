@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>行李打包清單 · 家族東京9日遊</title>
+    <meta name="description" content="家族東京9日遊行李打包清單：隨身／託運分區、通用清單、旅程專屬提醒與回程採購清單">
+
+    <!-- 加到手機主畫面（PWA） -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="icon" href="icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="東京9日">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- 與行程頁共用的樣式（設計 token、標頭、底部導覽、深色模式） -->
+    <link rel="stylesheet" href="shared.css">
+
+    <style>
+        /* ========== Header（本頁專屬：行李箱圖示動畫）========== */
+        .header-title .icon-bag {
+            display: inline-block;
+            animation: sway 3s ease-in-out infinite;
+        }
+
+        @keyframes sway {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-4px) rotate(-6deg);
+            }
+        }
+
+        /* ========== Sticky Toolbar (progress + actions) ========== */
+        .pack-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 12px 16px 10px;
+        }
+
+        .progress-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--gray-700);
+        }
+
+        .progress-count {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--primary-600);
+        }
+
+        .progress-track {
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.28);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--primary-500), var(--accent-violet) 55%, var(--accent-pink));
+            transition: width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+
+        .tool-btn {
+            flex-shrink: 0;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.55);
+            color: var(--gray-600);
+            font-family: var(--font-sans);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s ease, color 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .tool-btn:active {
+            transform: scale(0.95);
+        }
+
+        .tool-btn.danger {
+            color: #e11d48;
+        }
+
+        /* ========== Memo Card ========== */
+        .memo-card {
+            margin: 16px;
+            padding: 18px 18px 18px 22px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--accent-coral);
+            box-shadow: var(--glass-shadow);
+            animation: slideUp 0.5s ease-out both;
+        }
+
+        .memo-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--gray-800);
+            margin-bottom: 10px;
+        }
+
+        .memo-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .memo-list li {
+            font-size: 0.82rem;
+            color: var(--gray-600);
+            padding: 5px 0 5px 18px;
+            position: relative;
+            line-height: 1.7;
+        }
+
+        .memo-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent-coral);
+            font-weight: bold;
+        }
+
+        .memo-list li strong {
+            color: var(--gray-700);
+        }
+
+        /* ========== Pack Section Card ========== */
+        .pack-list {
+            padding: 0 16px;
+        }
+
+        .pack-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 14px;
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out both;
+        }
+
+        .pack-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 16px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .pack-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .pack-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pack-title {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            line-height: 1.4;
+        }
+
+        .pack-sub {
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--gray-500);
+            margin-top: 3px;
+            letter-spacing: 0.3px;
+        }
+
+        .pack-badge {
+            flex-shrink: 0;
+            font-family: var(--font-display);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.18);
+            color: var(--gray-600);
+        }
+
+        .pack-badge.done {
+            background: rgba(34, 197, 94, 0.16);
+            color: #16a34a;
+        }
+
+        .pack-chevron {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            color: var(--gray-400);
+            transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+        }
+
+        .pack-chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .pack-card-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pack-card-body-inner {
+            padding: 0 16px 14px;
+        }
+
+        /* ========== Note inside a section ========== */
+        .pack-note {
+            font-size: 0.76rem;
+            line-height: 1.7;
+            color: var(--gray-600);
+            background: rgba(148, 163, 184, 0.12);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+
+        .pack-note strong {
+            color: var(--gray-700);
+        }
+
+        /* ========== Checklist rows ========== */
+        .check-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            padding: 9px 4px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.15s ease;
+        }
+
+        .check-row:active {
+            background: rgba(148, 163, 184, 0.14);
+        }
+
+        .check-row+.check-row {
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .check-box {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            margin-top: 1px;
+            border-radius: 6px;
+            border: 2px solid var(--gray-300);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+        }
+
+        .check-box svg {
+            width: 12px;
+            height: 12px;
+            color: #fff;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.18s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .check-row.checked .check-box {
+            background: var(--sec-color, var(--primary-500));
+            border-color: var(--sec-color, var(--primary-500));
+        }
+
+        .check-row.checked .check-box svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .check-text {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: var(--gray-700);
+            transition: color 0.2s ease;
+        }
+
+        .check-hint {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--gray-500);
+            margin-top: 2px;
+            line-height: 1.5;
+        }
+
+        /* 刪除線只加在主文字上（text-decoration 會往子元素傳播，不能靠 hint 自己取消） */
+        .check-row.checked .check-main {
+            color: var(--gray-400);
+            text-decoration: line-through;
+            text-decoration-thickness: 1.5px;
+        }
+
+        .check-row.checked .check-hint {
+            color: var(--gray-400);
+            opacity: 0.75;
+        }
+
+        /* ========== Tips card (no checkboxes) ========== */
+        .tip-item {
+            padding: 11px 0;
+            font-size: 0.82rem;
+            line-height: 1.72;
+            color: var(--gray-600);
+        }
+
+        .tip-item+.tip-item {
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .tip-item b {
+            display: inline-block;
+            color: var(--gray-800);
+            margin-bottom: 2px;
+        }
+
+        /* ========== Focus / A11y ========== */
+        :focus-visible {
+            outline: 3px solid var(--primary-400);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+
+        /* ========== Dark Mode ========== */
+        body.dark .tool-btn {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        body.dark .pack-note {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark .progress-track {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        /* ========== Print ========== */
+        @media print {
+
+            .pack-toolbar,
+            .bottom-nav,
+            .theme-toggle {
+                display: none !important;
+            }
+
+            .pack-card-body {
+                max-height: none !important;
+            }
+
+            body {
+                background: #fff;
+                padding-bottom: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ========== Header ========== -->
+    <header class="app-header">
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="切換深色／淺色"
+            aria-label="切換深色／淺色模式">
+            <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.2" y1="4.2" x2="5.6" y2="5.6"></line>
+                <line x1="18.4" y1="18.4" x2="19.8" y2="19.8"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.2" y1="19.8" x2="5.6" y2="18.4"></line>
+                <line x1="18.4" y1="5.6" x2="19.8" y2="4.2"></line>
+            </svg>
+        </button>
+        <h1 class="header-title">
+            <span class="icon-bag">🧳</span> 行李打包清單
+        </h1>
+        <p class="header-subtitle">東京 9 日 ── 8/17 – 8/25 · 盛夏出行</p>
+        <div class="trip-status" id="trip-status"></div>
+    </header>
+
+    <!-- ========== Toolbar：進度與操作 ========== -->
+    <div class="pack-toolbar">
+        <div class="progress-row">
+            <span class="progress-label">📦 打包進度</span>
+            <span class="progress-count" id="progress-count">0 / 0</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="toolbar-actions no-scrollbar">
+            <button class="tool-btn" onclick="expandAll(true)">全部展開</button>
+            <button class="tool-btn" onclick="expandAll(false)">全部收合</button>
+            <button class="tool-btn" onclick="hideDone()">收合已完成</button>
+            <button class="tool-btn danger" onclick="resetAll()">重置勾選</button>
+        </div>
+    </div>
+
+    <!-- ========== 出發前重點 ========== -->
+    <div class="memo-card" role="note">
+        <div class="memo-title">💡 打包大原則</div>
+        <ul class="memo-list">
+            <li><strong>天氣：</strong>8 月東京・橫濱約 <strong>30–36°C</strong>、濕度高，白天以排汗透氣衣物為主；室內與電車冷氣強，隨身一件薄外套。</li>
+            <li><strong>少帶多買：</strong>盥洗用品飯店都有、藥妝當地更便宜，去程行李箱留 <strong>1/3 空間</strong>給採購。</li>
+            <li><strong>換宿三段：</strong>8/22、8/24 各換一次飯店，大件行李建議用<strong>宅配便</strong>直送，當天輕裝玩。</li>
+            <li><strong>走路量大：</strong>鎌倉、江之島、橫濱步行多，好走的鞋與水泡貼是必需品，不是加分品。</li>
+            <li><strong>分散風險：</strong>護照影本、現金、信用卡分兩個包放，家人之間互相備份。</li>
+        </ul>
+    </div>
+
+    <!-- ========== 清單區塊 ========== -->
+    <div class="pack-list" id="pack-container"></div>
+
+    <!-- ========== Bottom Navigation ========== -->
+    <nav class="bottom-nav" aria-label="主選單">
+        <div class="nav-container">
+            <div class="nav-pill far-right" id="nav-pill"></div>
+
+            <a href="index.html" class="nav-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                    </path>
+                </svg>
+                <span>行程</span>
+            </a>
+
+            <a href="index.html?view=map" class="nav-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
+                    </path>
+                </svg>
+                <span>地圖</span>
+            </a>
+
+            <a href="luggage.html" class="nav-btn active" aria-current="page">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 6V4.5A1.5 1.5 0 0110.5 3h3A1.5 1.5 0 0115 4.5V6m-9 0h12a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2zm4 3v8m4-8v8">
+                    </path>
+                </svg>
+                <span>行李</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- ========== JavaScript ========== -->
+    <script>
+        // ========== Packing Data ==========
+        // 每個項目可以是字串，或 { t: 主文字, h: 補充說明 }
+        const packSections = [
+            {
+                id: 'carry', icon: '🎒', color: '#f43f5e',
+                title: '隨身行李（登機箱／背包）', sub: '上機帶著走 · 掉了會很痛的東西',
+                note: '<strong>液體、膠狀物單瓶 ≤100ml</strong>，全部裝進 1 公升透明夾鏈袋；<strong>行動電源、鋰電池、打火機一律隨身，不可託運</strong>。',
+                items: [
+                    { t: '護照', h: '效期需 6 個月以上（2026/8 出發 → 至少到 2027/2）' },
+                    { t: '電子機票／訂位代號', h: '去程 BR196、回程 BR197' },
+                    { t: '三間飯店訂房確認單', h: '格拉斯麗淺草／新橫濱菲諾／相鐵 Fresa Inn' },
+                    { t: 'Visit Japan Web QR 截圖', h: '入境審查與海關申報，先存離線截圖' },
+                    { t: '日幣現金 + 少量台幣' },
+                    { t: '信用卡（已開通海外交易）' },
+                    { t: '手機 + 充電線' },
+                    { t: '行動電源', h: '≤100Wh，必須隨身' },
+                    { t: '常備藥、慢性病藥', h: '原包裝，並帶處方箋影本' },
+                    { t: '一套換洗衣物', h: '託運行李延誤時的救命包' },
+                    { t: '薄外套', h: '機艙與電車冷氣很強' },
+                    { t: '眼鏡／隱形眼鏡／老花眼鏡' },
+                    { t: '口罩、濕紙巾、面紙' },
+                    { t: '原子筆', h: '填寫入境卡用' },
+                    { t: '折疊傘', h: '遮陽兼午後雷陣雨' }
+                ]
+            },
+            {
+                id: 'checked', icon: '🧳', color: '#f97316',
+                title: '託運行李', sub: '大件、液體、伴手禮空間',
+                note: '長榮經濟艙託運上限一般為 <strong>每人 30kg</strong>（依票種為準）。出發前先秤一次，回程也要秤。<strong>行動電源、電子菸不可託運</strong>。',
+                items: [
+                    { t: '大件衣物與鞋子' },
+                    { t: '沐浴、保養瓶罐（>100ml）' },
+                    { t: '行李秤', h: '回程採購後必用' },
+                    { t: '折疊購物袋、空托特包' },
+                    { t: '洗衣袋', h: '分裝髒衣，換宿時不混亂' },
+                    { t: '夾鏈袋、收納壓縮袋' },
+                    { t: '室內拖鞋' },
+                    { t: '保溫瓶／水壺', h: '空瓶過安檢，日本便利商店可補水' },
+                    { t: '行李箱束帶／識別牌' },
+                    { t: '預留 1/3 空間給伴手禮' }
+                ]
+            },
+            {
+                id: 'docs', icon: '🪪', color: '#eab308',
+                title: '證件與金錢', sub: '分散放，不要全押同一個包',
+                note: '護照影本與備用信用卡建議放在<strong>另一位家人</strong>的行李中，遺失時才有備援。',
+                items: [
+                    { t: '護照 + 影本（分開放）' },
+                    { t: '身分證／駕照' },
+                    { t: '大頭照 2 張', h: '護照遺失補辦用' },
+                    { t: '旅平險保單與緊急聯絡電話' },
+                    { t: '日幣現金', h: '建議每人 3–5 萬日幣，小鈔多帶' },
+                    { t: 'Suica／PASMO 或手機錢包', h: '先儲值，鎌倉綠色車廂券要刷卡登記' },
+                    { t: '信用卡 2 張以上（分開放）' },
+                    { t: '家人聯絡清單、飯店地址（日文）', h: '給計程車司機看最快' }
+                ]
+            },
+            {
+                id: 'tech', icon: '🔌', color: '#22c55e',
+                title: '電子產品', sub: '充電、上網、拍照',
+                note: '日本電壓 <strong>100V</strong>、插座為兩孔平行 A 型，<strong>台灣電器可直接使用</strong>，不需變壓器或轉接頭。',
+                items: [
+                    { t: '多孔 USB 充電器' },
+                    { t: '延長線／多孔插座', h: '飯店插座少，一家人共用超實用' },
+                    { t: '行動電源（隨身）' },
+                    { t: '相機、鏡頭、記憶卡、備用電池' },
+                    { t: '耳機' },
+                    { t: 'eSIM 或 Wi-Fi 分享器', h: '出發前先安裝設定好' },
+                    { t: '自拍棒／小腳架' },
+                    { t: '離線地圖與行程頁面', h: '把本站加入手機主畫面即可離線看' }
+                ]
+            },
+            {
+                id: 'clothes', icon: '👕', color: '#06b6d4',
+                title: '衣物（9 天 · 盛夏）', sub: '排汗為主，室內加一件',
+                note: '以「少帶＋中途洗」為原則：飯店多有自助洗衣機，帶小包洗衣精可少帶 3 天份衣物。',
+                items: [
+                    { t: '排汗短袖上衣 ×6–7' },
+                    { t: '薄長褲／短褲 ×3' },
+                    { t: '薄外套或防曬罩衫 ×1–2' },
+                    { t: '內衣褲、襪子 ×9', h: '或帶 5 天份 + 中途洗' },
+                    { t: '睡衣', h: '日本飯店多附浴衣，可省' },
+                    { t: '好走的運動鞋', h: '鎌倉、江之島、橫濱走很多路' },
+                    { t: '涼鞋或拖鞋' },
+                    { t: '一套稍正式的衣服', h: '銀座下午茶、拍照用' },
+                    { t: '遮陽帽、太陽眼鏡' },
+                    { t: '泳衣', h: '飯店泳池／溫泉如需' }
+                ]
+            },
+            {
+                id: 'toiletries', icon: '🧴', color: '#6366f1',
+                title: '盥洗與保養', sub: '飯店有的就別帶',
+                note: '日本飯店通常備有牙刷、毛巾、洗髮沐浴用品與吹風機；<strong>防曬乳是這趟最重要的一項</strong>。',
+                items: [
+                    { t: '防曬乳 SPF50+', h: '8 月紫外線極強，每天補擦' },
+                    { t: '洗面乳、保養品（分裝瓶）' },
+                    { t: '化妝品、卸妝用品' },
+                    { t: '隱形眼鏡藥水' },
+                    { t: '刮鬍刀' },
+                    { t: '梳子、髮圈、小鏡子' },
+                    { t: '小包裝洗衣精', h: '飯店自助洗衣用' },
+                    { t: '快乾毛巾' }
+                ]
+            },
+            {
+                id: 'meds', icon: '💊', color: '#a855f7',
+                title: '藥品與健康', sub: '中暑、走路痠痛、腸胃',
+                note: '藥品請放<strong>原包裝</strong>，慢性病藥另帶處方箋影本；日本藥局買藥需要溝通，自己帶最保險。',
+                items: [
+                    { t: '慢性病藥 + 處方箋影本' },
+                    { t: '腸胃藥、止瀉藥' },
+                    { t: '感冒藥、退燒止痛藥' },
+                    { t: '暈車藥', h: 'Skyliner、江之電、巴士' },
+                    { t: '防蚊液、蚊蟲藥膏', h: '鎌倉竹林、江之島、花火節會場' },
+                    { t: 'OK 繃、水泡貼', h: '走路多必備' },
+                    { t: '酸痛貼布／噴劑' },
+                    { t: '電解質粉包／鹽錠', h: '防中暑，比喝水更有效' }
+                ]
+            },
+            {
+                id: 'elders', icon: '🧓', color: '#ec4899',
+                title: '長輩與消暑裝備', sub: '這趟旅程的重點裝備',
+                note: '全程原則是<strong>「省膝蓋、防中暑」</strong>。長輩隨身包越輕越好，重物由年輕人分擔。',
+                items: [
+                    { t: '護膝／護腰' },
+                    { t: '折疊手杖', h: '鎌倉、江之島階梯多' },
+                    { t: '輕便折疊椅', h: '8/24 花火節卡位、排隊時救命' },
+                    { t: '手持電風扇 + 涼感巾' },
+                    { t: '涼感噴霧' },
+                    { t: '保溫瓶', h: '隨時補水，別等口渴' },
+                    { t: '老花眼鏡', h: '看菜單、看車票' },
+                    { t: '一週份分裝藥盒', h: '依日期分好，不用每天翻找' },
+                    { t: '健保卡影本／病歷摘要', h: '中英日文對照最好' },
+                    { t: '輕便雨衣', h: '比撐傘省力' }
+                ]
+            },
+            {
+                id: 'trip', icon: '🎆', color: '#0ea5e9',
+                title: '這趟旅程專屬提醒', sub: '花火節 · 三段換宿 · 回程',
+                tips: [
+                    { b: '8/24 花火節（19:30–20:00）', p: '帶折疊椅或野餐墊、扇子、防蚊液、零錢；提早到會場卡位。散場人潮極多，出發前先約定好「走散集合點」與回飯店動線。' },
+                    { b: '8/22、8/24 兩次換宿', p: '大件行李用<strong>宅配便 (takkyubin)</strong> 直送下一間飯店，當天輕裝玩。前一晚先把隔天要用的東西分裝到小背包。' },
+                    { b: '8/23 鎌倉', p: '月台售票機加購<strong>綠色車廂券</strong>並刷 Suica 登記，出發前確認卡片餘額足夠。當天走路量最大，穿最好走的鞋。' },
+                    { b: '8/25 回程', p: '橫濱站搭 9:30 左右的 N\'EX。<strong>前一晚就要打包完成</strong>：液體移到託運、行動電源移到隨身、免稅品不拆封。' },
+                    { b: '全程通用', p: '飯店房卡與地址拍照存手機；建立家族 LINE 群組隨時傳位置；長輩身上放一張寫有飯店名稱的卡片。' }
+                ]
+            },
+            {
+                id: 'shopping', icon: '🛍️', color: '#14b8a6',
+                title: '回程採購／伴手禮清單', sub: '想買什麼先勾起來',
+                note: '單店消費滿 <strong>¥5,000</strong> 可辦免稅（<strong>需出示護照</strong>）；免稅品在離境前<strong>請勿拆封</strong>。回程託運上限 30kg，記得先秤。',
+                items: [
+                    { t: '藥妝', h: 'EVE 止痛藥、休足時間、蒸氣眼罩、面膜' },
+                    { t: '零食', h: '東京香蕉、白色戀人、Royce、限定口味 KitKat' },
+                    { t: '抹茶／和菓子', h: '鎌倉小町通、銀座百貨地下街' },
+                    { t: '橫濱中華街肉包、月餅', h: '8/24 中午' },
+                    { t: '寶可夢中心周邊', h: '8/21 日本橋 Tokyo DX' },
+                    { t: '任天堂／三麗鷗／吉卜力周邊', h: '澀谷 Parco、原宿 Kiddy Land' },
+                    { t: '廚房小物、文具', h: 'Loft、東急手創館' },
+                    { t: '酒類', h: '每人限 3 瓶（各 760ml），須託運' },
+                    { t: '免稅單據收好', h: '出境海關可能查驗' },
+                    { t: '出境前秤重、重新分配行李' }
+                ]
+            }
+        ];
+
+        // ========== Trip Date Helpers（與 index.html 同一套）==========
+        const tripDayDate = (day) => new Date(2026, 7, 16 + day);
+        const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+        function updateTripStatus() {
+            const el = document.getElementById('trip-status');
+            if (!el) return;
+            const today = midnight(new Date());
+            const start = tripDayDate(1), end = tripDayDate(9);
+            if (today < start) {
+                const days = Math.round((start - today) / 86400000);
+                el.textContent = days === 0 ? '🎒 今天出發！' : `⏳ 距出發還有 ${days} 天`;
+            } else if (today <= end) {
+                el.textContent = '🗓️ 旅程進行中 · 別忘了收行李';
+            } else {
+                el.textContent = '✅ 旅程已結束 · 期待下次旅行';
+            }
+        }
+
+        // ========== Persistent State (與 index.html 共用同一個 key) ==========
+        const STORE_KEY = 'tokyo-trip-state-v1';
+
+        function loadState() {
+            try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+            catch (e) { return {}; }
+        }
+        function saveState(patch) {
+            try {
+                const s = loadState();
+                Object.assign(s, patch);
+                localStorage.setItem(STORE_KEY, JSON.stringify(s));
+            } catch (e) { /* storage unavailable — ignore */ }
+        }
+
+        let checked = new Set(loadState().luggage || []);
+        function saveChecked() {
+            saveState({ luggage: Array.from(checked) });
+        }
+
+        // ========== Render ==========
+        const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"
+            stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+        const container = document.getElementById('pack-container');
+
+        packSections.forEach((sec, si) => {
+            const card = document.createElement('div');
+            card.className = 'pack-card';
+            card.id = `sec-${sec.id}`;
+            card.style.animationDelay = `${0.08 + si * 0.05}s`;
+            card.style.setProperty('--sec-color', sec.color);
+
+            let bodyHtml = sec.note ? `<div class="pack-note">${sec.note}</div>` : '';
+
+            if (sec.tips) {
+                bodyHtml += sec.tips.map(t =>
+                    `<div class="tip-item"><b>${t.b}</b><br>${t.p}</div>`).join('');
+            } else {
+                bodyHtml += (sec.items || []).map((raw, ii) => {
+                    const item = typeof raw === 'string' ? { t: raw } : raw;
+                    const id = `${sec.id}-${ii}`;
+                    const on = checked.has(id);
+                    return `<div class="check-row ${on ? 'checked' : ''}" id="row-${id}"
+                                 role="checkbox" tabindex="0" aria-checked="${on}"
+                                 onclick="toggleItem('${id}')"
+                                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleItem('${id}')}">
+                            <div class="check-box">${CHECK_SVG}</div>
+                            <div class="check-text"><span class="check-main">${item.t}</span>${item.h ? `<span class="check-hint">${item.h}</span>` : ''}</div>
+                        </div>`;
+                }).join('');
+            }
+
+            const badge = sec.tips ? '' :
+                `<span class="pack-badge" id="badge-${sec.id}"></span>`;
+
+            card.innerHTML = `
+                <div class="pack-card-header"
+                     role="button" tabindex="0"
+                     aria-expanded="false" aria-controls="body-${sec.id}"
+                     onclick="toggleSection('${sec.id}')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSection('${sec.id}')}">
+                    <div class="pack-icon">${sec.icon}</div>
+                    <div class="pack-info">
+                        <div class="pack-title">${sec.title}</div>
+                        <div class="pack-sub">${sec.sub}</div>
+                    </div>
+                    ${badge}
+                    <svg class="pack-chevron" id="chev-${sec.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="pack-card-body" id="body-${sec.id}" role="region">
+                    <div class="pack-card-body-inner">${bodyHtml}</div>
+                </div>`;
+
+            container.appendChild(card);
+        });
+
+        // ========== Section collapse ==========
+        function setSectionOpen(secId, open) {
+            const body = document.getElementById(`body-${secId}`);
+            const chev = document.getElementById(`chev-${secId}`);
+            if (!body) return;
+            const header = chev.closest('.pack-card-header');
+            if (open) {
+                body.classList.add('expanded');
+                body.style.maxHeight = body.scrollHeight + 'px';
+            } else {
+                body.style.maxHeight = body.scrollHeight + 'px';
+                requestAnimationFrame(() => {
+                    body.classList.remove('expanded');
+                    body.style.maxHeight = '';
+                });
+            }
+            chev.classList.toggle('open', open);
+            header.setAttribute('aria-expanded', String(open));
+        }
+
+        function toggleSection(secId) {
+            const body = document.getElementById(`body-${secId}`);
+            setSectionOpen(secId, !body.classList.contains('expanded'));
+            saveOpenSections();
+        }
+
+        function expandAll(open) {
+            packSections.forEach(s => setSectionOpen(s.id, open));
+            saveOpenSections();
+        }
+
+        // 收合所有已完成（全部勾選）的區塊，只留還沒打包完的
+        function hideDone() {
+            packSections.forEach(s => {
+                if (s.tips) return;
+                const total = s.items.length;
+                const done = s.items.filter((_, i) => checked.has(`${s.id}-${i}`)).length;
+                setSectionOpen(s.id, done < total);
+            });
+            saveOpenSections();
+        }
+
+        function saveOpenSections() {
+            const open = packSections
+                .filter(s => document.getElementById(`body-${s.id}`).classList.contains('expanded'))
+                .map(s => s.id);
+            saveState({ luggageOpen: open });
+        }
+
+        // 內容高度會隨勾選狀態不變，但視窗寬度改變時要重算
+        function refreshHeights() {
+            packSections.forEach(s => {
+                const body = document.getElementById(`body-${s.id}`);
+                if (body && body.classList.contains('expanded')) {
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                }
+            });
+        }
+        window.addEventListener('resize', refreshHeights);
+
+        // ========== Checkbox ==========
+        function toggleItem(id) {
+            const row = document.getElementById(`row-${id}`);
+            if (!row) return;
+            const on = !checked.has(id);
+            if (on) checked.add(id); else checked.delete(id);
+            row.classList.toggle('checked', on);
+            row.setAttribute('aria-checked', String(on));
+            saveChecked();
+            updateProgress();
+        }
+
+        function resetAll() {
+            if (!confirm('確定要清除所有打包勾選嗎？')) return;
+            checked.clear();
+            saveChecked();
+            document.querySelectorAll('.check-row').forEach(r => {
+                r.classList.remove('checked');
+                r.setAttribute('aria-checked', 'false');
+            });
+            updateProgress();
+        }
+
+        // ========== Progress ==========
+        function updateProgress() {
+            let total = 0, done = 0;
+            packSections.forEach(s => {
+                if (s.tips) return;
+                let sTotal = s.items.length, sDone = 0;
+                s.items.forEach((_, i) => { if (checked.has(`${s.id}-${i}`)) sDone++; });
+                total += sTotal; done += sDone;
+
+                const badge = document.getElementById(`badge-${s.id}`);
+                if (badge) {
+                    badge.textContent = `${sDone}/${sTotal}`;
+                    badge.classList.toggle('done', sDone === sTotal);
+                }
+            });
+            const pct = total ? Math.round(done / total * 100) : 0;
+            document.getElementById('progress-count').textContent = `${done} / ${total}　(${pct}%)`;
+            document.getElementById('progress-fill').style.width = pct + '%';
+        }
+
+        // ========== Dark / Light Theme ==========
+        const SUN_ICON = `<circle cx="12" cy="12" r="5"></circle>` +
+            `<line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>` +
+            `<line x1="4.2" y1="4.2" x2="5.6" y2="5.6"></line><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"></line>` +
+            `<line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>` +
+            `<line x1="4.2" y1="19.8" x2="5.6" y2="18.4"></line><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"></line>`;
+        const MOON_ICON = `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>`;
+
+        function applyTheme(dark) {
+            document.body.classList.toggle('dark', dark);
+            const ic = document.getElementById('theme-icon');
+            if (ic) ic.innerHTML = dark ? MOON_ICON : SUN_ICON;
+        }
+        function toggleTheme() {
+            const dark = !document.body.classList.contains('dark');
+            applyTheme(dark);
+            saveState({ dark });
+        }
+
+        // ========== Boot ==========
+        (function boot() {
+            const s = loadState();
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(typeof s.dark === 'boolean' ? s.dark : prefersDark);
+
+            updateTripStatus();
+            updateProgress();
+
+            // 還原展開狀態；第一次進來預設展開「隨身行李」與「託運行李」
+            const toOpen = Array.isArray(s.luggageOpen) ? s.luggageOpen : ['carry', 'checked'];
+            setTimeout(() => toOpen.forEach(id => {
+                const body = document.getElementById(`body-${id}`);
+                if (body && !body.classList.contains('expanded')) setSectionOpen(id, true);
+            }), 120);
+        })();
+    </script>
+</body>
+
+</html>

@@ -7,6 +7,14 @@
     <title>家族東京9日遊</title>
     <meta name="description" content="家族東京9日旅遊行程規劃，涵蓋景點地圖、交通攻略與每日行程安排">
 
+    <!-- 加到手機主畫面（PWA） -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="icon" href="icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="東京9日">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,146 +26,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <!-- 與行李清單頁共用的樣式（設計 token、標頭、底部導覽、深色模式） -->
+    <link rel="stylesheet" href="shared.css">
+
     <style>
-        /* ========== Design Tokens ========== */
-        :root {
-            --font-sans: 'Noto Sans TC', 'Inter', system-ui, sans-serif;
-            --font-display: 'Inter', 'Noto Sans TC', system-ui, sans-serif;
-
-            /* Primary palette */
-            --primary-50: #eef2ff;
-            --primary-100: #e0e7ff;
-            --primary-400: #818cf8;
-            --primary-500: #6366f1;
-            --primary-600: #4f46e5;
-            --primary-700: #4338ca;
-
-            /* Accent */
-            --accent-pink: #ec4899;
-            --accent-violet: #8b5cf6;
-            --accent-coral: #f97316;
-
-            /* Neutrals */
-            --gray-50: #f8fafc;
-            --gray-100: #f1f5f9;
-            --gray-200: #e2e8f0;
-            --gray-300: #cbd5e1;
-            --gray-400: #94a3b8;
-            --gray-500: #64748b;
-            --gray-600: #475569;
-            --gray-700: #334155;
-            --gray-800: #1e293b;
-            --gray-900: #0f172a;
-
-            /* Glass */
-            --glass-bg: rgba(255, 255, 255, 0.72);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-
-            /* Day accent colors */
-            --day-1: #f43f5e;
-            --day-2: #f97316;
-            --day-3: #eab308;
-            --day-4: #22c55e;
-            --day-5: #06b6d4;
-            --day-6: #6366f1;
-            --day-7: #a855f7;
-            --day-8: #ec4899;
-
-            /* Radius */
-            --radius-lg: 16px;
-            --radius-md: 12px;
-            --radius-sm: 8px;
-        }
-
-        /* ========== Base ========== */
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-sans);
-            background: linear-gradient(180deg, #eef2ff 0%, #fdf2f8 40%, #f0f9ff 100%);
-            background-attachment: fixed;
-            color: var(--gray-800);
-            padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* ========== Scrollbar ========== */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* ========== Header ========== */
-        .app-header {
-            position: relative;
-            z-index: 100;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-            color: white;
-            padding: 22px 16px 20px;
-            text-align: center;
-            overflow: hidden;
-            box-shadow: 0 4px 24px rgba(99, 102, 241, 0.35);
-        }
-
-        .app-header::before {
-            content: '';
-            position: absolute;
-            top: -40px;
-            right: -30px;
-            width: 140px;
-            height: 140px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .app-header::after {
-            content: '';
-            position: absolute;
-            bottom: -50px;
-            left: -20px;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .header-title {
-            font-family: var(--font-display);
-            font-size: 1.4rem;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            position: relative;
-            z-index: 1;
-        }
-
+        /* ========== Header（本頁專屬：飛機圖示動畫）========== */
         .header-title .icon-plane {
             display: inline-block;
             animation: float 3s ease-in-out infinite;
-        }
-
-        .header-subtitle {
-            font-size: 0.75rem;
-            opacity: 0.8;
-            margin-top: 5px;
-            font-weight: 400;
-            letter-spacing: 1.5px;
-            position: relative;
-            z-index: 1;
         }
 
         @keyframes float {
@@ -172,52 +48,11 @@
             }
         }
 
-        /* ========== Memo Card ========== */
+        /* 備忘錄左側漸層色條（卡片其餘樣式在 shared.css） */
         .memo-card {
-            margin: 16px;
-            padding: 18px 18px 18px 22px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
             border-left: 4px solid transparent;
             border-image: linear-gradient(180deg, #f97316, #f43f5e) 1;
             border-image-slice: 1;
-            box-shadow: var(--glass-shadow);
-            animation: slideUp 0.5s ease-out both;
-        }
-
-        .memo-title {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--gray-800);
-            margin-bottom: 10px;
-        }
-
-        .memo-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .memo-list li {
-            font-size: 0.82rem;
-            color: var(--gray-600);
-            padding: 5px 0 5px 18px;
-            position: relative;
-            line-height: 1.7;
-        }
-
-        .memo-list li::before {
-            content: '▸';
-            position: absolute;
-            left: 0;
-            color: var(--accent-coral);
-            font-weight: bold;
-        }
-
-        .memo-list li strong {
-            color: var(--gray-700);
         }
 
         /* ========== Booking Card ========== */
@@ -522,116 +357,6 @@
             line-height: 1.7;
         }
 
-        /* ========== Bottom Navigation (floating glass pill) ========== */
-        .bottom-nav {
-            position: fixed;
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-            z-index: 100;
-            width: min(92%, 360px);
-            padding: 6px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            border-radius: 999px;
-            box-shadow: 0 16px 44px rgba(31, 38, 135, 0.3),
-                0 4px 12px rgba(0, 0, 0, 0.06),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5);
-            animation: navRise 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-        }
-
-        @keyframes navRise {
-            from {
-                opacity: 0;
-                transform: translate(-50%, 30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0);
-            }
-        }
-
-        .nav-container {
-            display: flex;
-            position: relative;
-            gap: 6px;
-            height: 52px;
-        }
-
-        /* Sliding gradient highlight behind the active tab */
-        .nav-pill {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            width: calc(50% - 3px);
-            border-radius: 999px;
-            background: linear-gradient(135deg, var(--primary-500), var(--accent-violet) 60%, var(--accent-pink));
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 0;
-        }
-
-        .nav-pill::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 999px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), transparent 55%);
-        }
-
-        .nav-pill.right {
-            transform: translateX(calc(100% + 6px));
-        }
-
-        .nav-btn {
-            position: relative;
-            z-index: 1;
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            height: 100%;
-            border: none;
-            background: none;
-            cursor: pointer;
-            border-radius: 999px;
-            color: var(--gray-500);
-            font-family: var(--font-sans);
-            transition: color 0.3s ease, transform 0.18s ease;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .nav-btn.active {
-            color: #fff;
-        }
-
-        .nav-btn:active {
-            transform: scale(0.94);
-        }
-
-        .nav-btn svg {
-            width: 21px;
-            height: 21px;
-            flex-shrink: 0;
-            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .nav-btn.active svg {
-            transform: scale(1.14) rotate(-4deg);
-        }
-
-        .nav-btn span {
-            font-size: 0.78rem;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-        }
-
         /* ========== Full-screen Map ========== */
         .map-fullscreen {
             position: relative;
@@ -652,10 +377,10 @@
             z-index: 10;
         }
 
-        /* Floating hint chip on the map */
+        /* Floating hint chip on the map (在導航模式切換列下方) */
         .map-hint {
             position: absolute;
-            top: 12px;
+            top: 54px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 20;
@@ -922,19 +647,6 @@
             color: #7c2d12;
         }
 
-        /* ========== Animations ========== */
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(28px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         /* ========== Views ========== */
         .view {
             display: none;
@@ -966,7 +678,7 @@
 
         /* ========== Focus / A11y ========== */
         .day-card-header:focus-visible,
-        .nav-btn:focus-visible {
+        .legend-item:focus-visible {
             outline: 2px solid var(--primary-500);
             outline-offset: -2px;
             border-radius: var(--radius-sm);
@@ -993,30 +705,7 @@
             }
         }
 
-        /* ========== Dark Mode ========== */
-        body.dark {
-            --gray-50: #0f172a;
-            --gray-100: #1e293b;
-            --gray-200: #334155;
-            --gray-300: #475569;
-            --gray-400: #64748b;
-            --gray-500: #94a3b8;
-            --gray-600: #cbd5e1;
-            --gray-700: #e2e8f0;
-            --gray-800: #f1f5f9;
-            --gray-900: #f8fafc;
-            --glass-bg: rgba(30, 41, 59, 0.72);
-            --glass-border: rgba(148, 163, 184, 0.18);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-            background: linear-gradient(180deg, #0f172a 0%, #1e1b2e 45%, #0c1a2b 100%);
-            color: var(--gray-800);
-        }
-
-        body.dark .bottom-nav {
-            background: rgba(15, 23, 42, 0.9);
-            border-top-color: rgba(255, 255, 255, 0.08);
-        }
-
+        /* ========== Dark Mode（本頁專屬；共用變數在 shared.css）========== */
         body.dark .map-hint,
         body.dark .map-legend,
         body.dark .map-fit-btn {
@@ -1057,54 +746,6 @@
         /* Dark map tiles (markers live in a separate pane, unaffected) */
         body.dark #map .leaflet-tile-pane {
             filter: brightness(0.72) invert(1) contrast(0.9) hue-rotate(180deg) saturate(0.7);
-        }
-
-        /* ========== Theme Toggle ========== */
-        .theme-toggle {
-            position: absolute;
-            top: 16px;
-            right: 14px;
-            z-index: 2;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            border: none;
-            background: rgba(255, 255, 255, 0.18);
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(6px);
-            transition: transform 0.15s ease, background 0.2s ease;
-        }
-
-        .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.08);
-        }
-
-        .theme-toggle:active {
-            transform: scale(0.92);
-        }
-
-        .theme-toggle svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* ========== Trip Status Chip ========== */
-        .trip-status {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 4px 14px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.2);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            position: relative;
-            z-index: 1;
         }
 
         /* ========== Sticky Toolbar (search + date strip) ========== */
@@ -1333,6 +974,95 @@
             color: var(--primary-500);
         }
 
+        /* ========== 地圖載入失敗的備援清單 ========== */
+        /* Leaflet 走 CDN，沒網路時整個地圖會是空白；這時改列出可直接開 Google Maps 的景點 */
+        .map-fullscreen.no-map .map-fit-btn,
+        .map-fullscreen.no-map .map-legend,
+        .map-fullscreen.no-map .map-hint,
+        .map-fullscreen.no-map .travel-mode {
+            display: none;
+        }
+
+        .map-fallback {
+            height: 100%;
+            overflow-y: auto;
+            padding: 18px 16px calc(110px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .map-fallback .fb-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .map-fallback .fb-sub {
+            margin: 6px 0 16px;
+            font-size: 0.8rem;
+            line-height: 1.7;
+            color: var(--gray-600);
+        }
+
+        .map-fallback .fb-head {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .map-fallback .fb-day {
+            margin-bottom: 16px;
+        }
+
+        .map-fallback .fb-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .map-fallback .fb-links a {
+            padding: 6px 11px;
+            border-radius: 999px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            font-size: 0.78rem;
+            color: var(--gray-700);
+            text-decoration: none;
+        }
+
+        /* ========== 搜尋無結果 ========== */
+        .search-empty {
+            display: none;
+            margin: 8px 16px 24px;
+            padding: 30px 20px;
+            text-align: center;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .search-empty .se-icon {
+            font-size: 2rem;
+            opacity: 0.55;
+        }
+
+        .search-empty .se-title {
+            margin-top: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--gray-700);
+        }
+
+        .search-empty .se-hint {
+            margin-top: 6px;
+            font-size: 0.78rem;
+            line-height: 1.7;
+            color: var(--gray-500);
+        }
+
         /* ========== Stacked map buttons ========== */
         .map-fit-btn.second {
             top: 58px;
@@ -1340,6 +1070,76 @@
 
         .map-fit-btn.third {
             top: 104px;
+        }
+
+        .map-fit-btn.fourth {
+            top: 150px;
+        }
+
+        /* ========== Travel mode switch (導航交通方式) ========== */
+        .travel-mode {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+            display: flex;
+            gap: 3px;
+            padding: 4px;
+            border-radius: 999px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+        }
+
+        .tm-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 30px;
+            padding: 0 9px;
+            border: none;
+            border-radius: 999px;
+            background: none;
+            color: var(--gray-600);
+            font-family: var(--font-sans);
+            font-size: 0.72rem;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.25s ease, color 0.25s ease, transform 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .tm-btn .tm-emoji {
+            font-size: 0.95rem;
+            line-height: 1;
+        }
+
+        /* 只有選中的模式顯示文字，未選中維持 emoji，橫向不佔空間 */
+        .tm-btn .tm-label {
+            display: none;
+        }
+
+        .tm-btn.on {
+            background: linear-gradient(135deg, var(--primary-500), var(--accent-violet));
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.45);
+        }
+
+        .tm-btn.on .tm-label {
+            display: inline;
+        }
+
+        .tm-btn:active {
+            transform: scale(0.94);
+        }
+
+        body.dark .travel-mode {
+            background: rgba(30, 41, 59, 0.92);
         }
 
         .map-fit-btn.is-on {
@@ -1492,6 +1292,13 @@
 
         <!-- Itinerary Cards -->
         <div class="itinerary-list" id="itinerary-container"></div>
+
+        <!-- 搜尋無結果 -->
+        <div class="search-empty" id="search-empty">
+            <div class="se-icon">🔍</div>
+            <div class="se-title">找不到符合的行程</div>
+            <div class="se-hint">試試看景點名稱（例如「江之島」「銀座」）、日期（例如 8/23），或按上方 ✕ 清除搜尋。</div>
+        </div>
     </main>
 
     <!-- ========== Map View ========== -->
@@ -1499,6 +1306,19 @@
         <div class="map-fullscreen">
             <!-- Map fills the entire area -->
             <div id="map"></div>
+
+            <!-- 導航交通方式：影響所有標記的 Google Maps 導航連結 -->
+            <div class="travel-mode" id="travel-mode" role="group" aria-label="導航交通方式">
+                <button class="tm-btn" data-mode="transit" onclick="setTravelMode('transit')" title="以大眾運輸導航">
+                    <span class="tm-emoji">🚆</span><span class="tm-label">大眾運輸</span>
+                </button>
+                <button class="tm-btn" data-mode="walking" onclick="setTravelMode('walking')" title="以步行導航">
+                    <span class="tm-emoji">🚶</span><span class="tm-label">步行</span>
+                </button>
+                <button class="tm-btn" data-mode="driving" onclick="setTravelMode('driving')" title="以開車／計程車導航">
+                    <span class="tm-emoji">🚕</span><span class="tm-label">計程車</span>
+                </button>
+            </div>
 
             <!-- Floating hint -->
             <div class="map-hint">📍 標記的顏色與編號對應每日行程</div>
@@ -1536,6 +1356,15 @@
                     <path d="M8.5 20l-1.5 1.5M15.5 20l1.5 1.5"></path>
                     <circle cx="9" cy="13.5" r="1"></circle>
                     <circle cx="15" cy="13.5" r="1"></circle>
+                </svg>
+            </button>
+
+            <!-- Toggle railway map overlay -->
+            <button class="map-fit-btn fourth" id="btn-rail" onclick="toggleRail()" title="顯示／隱藏鐵道路線圖">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 6h16M4 18h16"></path>
+                    <path d="M9 3l-2 18M15 3l2 18"></path>
                 </svg>
             </button>
 
@@ -1586,101 +1415,175 @@
     </main>
 
     <!-- ========== Bottom Navigation ========== -->
-    <nav class="bottom-nav" role="tablist" aria-label="主選單">
+    <nav class="bottom-nav" aria-label="主選單">
         <div class="nav-container">
             <div class="nav-pill" id="nav-pill"></div>
 
-            <button onclick="switchTab('itinerary')" id="tab-btn-itinerary" class="nav-btn active" role="tab"
-                aria-selected="true" aria-controls="view-itinerary">
+            <button onclick="switchTab('itinerary')" id="tab-btn-itinerary" class="nav-btn active"
+                aria-current="page">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
                     </path>
                 </svg>
-                <span>行程總覽</span>
+                <span>行程</span>
             </button>
 
-            <button onclick="switchTab('map')" id="tab-btn-map" class="nav-btn" role="tab" aria-selected="false"
-                aria-controls="view-map">
+            <button onclick="switchTab('map')" id="tab-btn-map" class="nav-btn">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
                     </path>
                 </svg>
-                <span>地圖與交通</span>
+                <span>地圖</span>
             </button>
+
+            <a href="luggage.html" id="tab-btn-luggage" class="nav-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 6V4.5A1.5 1.5 0 0110.5 3h3A1.5 1.5 0 0115 4.5V6m-9 0h12a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2zm4 3v8m4-8v8">
+                    </path>
+                </svg>
+                <span>行李</span>
+            </a>
         </div>
     </nav>
 
     <!-- ========== JavaScript ========== -->
     <script>
         // ========== Itinerary Data ==========
+        // 每天的 places 就是地圖上的標記（順序＝當天走訪順序，也用來畫路線），
+        // 行程文字與地圖點位放在一起，刪改景點只需要動一個地方。
         const itinerary = [
             {
-                day: 1, date: '8/17 一', title: '抵達東京・入住淺草', meal: '機上餐／淺草便利商店', budget: '¥1,000', items: [
+                day: 1, title: '抵達東京・入住淺草', meal: '機上餐／淺草便利商店', budget: '¥1,000',
+                items: [
                     { time: '15:20', desc: '長榮 BR196 從桃園 T2 起飛。' },
                     { time: '19:40', desc: '抵達成田機場 T1。搭 Skyliner 或利木津巴士前往淺草（約 60–75 分）。' },
                     { time: '晚上', desc: '入住格拉斯麗淺草酒店。長輩休息調時差，年輕人到附近超市／便利商店採買消夜。' }
-                ]
+                ],
+                places: []
             },
             {
-                day: 2, date: '8/18 二', title: '淺草・晴空塔（飯店周邊，剛到不奔波）', meal: '淺草天丼／晴空塔美食街', budget: '¥4,000', items: [
+                day: 2, title: '淺草・晴空塔（飯店周邊，剛到不奔波）', meal: '淺草天丼／晴空塔美食街', budget: '¥4,000',
+                area: '淺草・晴空塔',
+                items: [
                     { time: '上午', desc: '淺草寺 — 雷門大燈籠、仲見世通商店街。離飯店近、地勢平坦，最適合第一天暖身。' },
                     { time: '下午–傍晚', desc: '晴空塔 — 登塔看東京全景，逛 Skytree Town。長輩在展望台咖啡廳休息，年輕人自由逛街。' }
+                ],
+                places: [
+                    { name: '淺草寺', lat: 35.7147, lng: 139.7966, desc: '雷門大燈籠與仲見世通商店街' },
+                    { name: '晴空塔', lat: 35.7100, lng: 139.8107, desc: '東京地標，可俯瞰市區全景' }
                 ]
             },
             {
-                day: 3, date: '8/19 三', title: '原宿・明治神宮・新宿', meal: '新宿百貨美食街／思出横丁串燒', budget: '¥5,000', items: [
+                day: 3, title: '原宿・明治神宮・新宿', meal: '新宿百貨美食街／思出横丁串燒', budget: '¥5,000',
+                area: '原宿・新宿',
+                items: [
                     { time: '上午', desc: '明治神宮 — 森林參道慢慢走，感受神社靜謐。出來逛原宿 Kiddy Land（三麗鷗、吉卜力周邊）。' },
                     { time: '下午', desc: '搭山手線到新宿（約 5 分）。新宿御苑廣闊日式庭園散步、迪士尼旗艦店採購。' },
                     { time: '傍晚', desc: '東京都廳免費展望台看夕陽夜景；思出横丁串燒居酒屋晚餐。' }
+                ],
+                places: [
+                    { name: '明治神宮', lat: 35.6763, lng: 139.6993, desc: '都市中的廣闊森林與神聖氛圍' },
+                    { name: 'Kiddy Land', lat: 35.6696, lng: 139.7047, desc: '原宿知名玩具與動漫雜貨旗艦店' },
+                    { name: '新宿御苑', lat: 35.6852, lng: 139.7100, desc: '絕美廣闊的日式庭園' },
+                    { name: '迪士尼旗艦店', lat: 35.6917, lng: 139.7034, desc: '日本最大規模的 Disney Flagship Tokyo' },
+                    { name: '東京都廳', lat: 35.6896, lng: 139.6917, desc: '免費高空展望台，看夜景好去處' },
+                    { name: '思出横丁', lat: 35.6923, lng: 139.6995, desc: '懷舊的復古串燒居酒屋小巷' }
                 ]
             },
             {
-                day: 4, date: '8/20 四', title: '上野・澀谷潮流', meal: '澀谷美食街／のんべい横丁居酒屋', budget: '¥5,000', items: [
+                day: 4, title: '上野・澀谷潮流', meal: '澀谷美食街／のんべい横丁居酒屋', budget: '¥5,000',
+                area: '上野・澀谷',
+                items: [
                     { time: '上午', desc: '上野 — 阿美橫丁採買伴手禮、上野公園綠意散步。' },
                     { time: '下午', desc: '搭車前往澀谷。忠犬八公像、澀谷十字路口拍照。逛澀谷 109、丸井百貨、Parco（任天堂旗艦店）。宮下公園（商場＋頂樓公園）。' },
                     { time: '晚上', desc: 'のんべい横丁 — 車站旁昭和風小酒館街，年輕人探索；長輩可先搭車回飯店。' }
+                ],
+                places: [
+                    { name: '上野公園', lat: 35.7146, lng: 139.7734, desc: '廣大綠地，適合散步賞景' },
+                    { name: '忠犬八公像', lat: 35.6590, lng: 139.7006, desc: '澀谷最著名的會面地標' },
+                    { name: '十字路口', lat: 35.6595, lng: 139.7000, desc: '全世界最繁忙的十字路口' },
+                    { name: '澀谷丸井百貨', lat: 35.6612, lng: 139.7005, desc: '熱門購物與流行指標' },
+                    { name: 'Parco (澀谷)', lat: 35.6622, lng: 139.6987, desc: '潮流品牌與任天堂旗艦店所在地' },
+                    { name: '宮下公園', lat: 35.6619, lng: 139.7019, desc: '結合商場與頂樓公園的複合設施' },
+                    { name: 'のんべい横丁', lat: 35.6602, lng: 139.7014, desc: '澀谷車站旁的昭和風小酒館街' }
                 ]
             },
             {
-                day: 5, date: '8/21 五', title: '日本橋・銀座・東京鐵塔（淺草最後一天）', meal: '銀座百貨美食街／貴婦下午茶', budget: '¥6,000', items: [
+                day: 5, title: '日本橋・銀座・東京鐵塔（淺草最後一天）', meal: '銀座百貨美食街／貴婦下午茶', budget: '¥6,000',
+                area: '銀座・日本橋',
+                items: [
                     { time: '上午', desc: '寶可夢中心 Tokyo DX（日本橋／東京站周邊）— 寶可夢迷必訪。' },
                     { time: '下午', desc: '銀座 — 高級百貨購物、貴婦下午茶（推薦百貨美食街，長輩有位子坐）。' },
                     { time: '傍晚', desc: '東京鐵塔 — 經典紅色地標夜景。回飯店整理行李，明日退房南下。' }
+                ],
+                places: [
+                    { name: '寶可夢中心 (Tokyo DX)', lat: 35.6815, lng: 139.7745, desc: '日本橋／東京站周邊，寶可夢愛好者天堂' },
+                    { name: '銀座', lat: 35.6712, lng: 139.7665, desc: '高級百貨與優雅下午茶' },
+                    { name: '東京鐵塔', lat: 35.6586, lng: 139.7454, desc: '經典不朽的紅色鐵塔地標' }
                 ]
             },
             {
-                day: 6, date: '8/22 六', title: '川崎（退房南下，順路停點）', meal: 'LA CITTADELLA 美食街', budget: '¥4,000', items: [
+                day: 6, title: '川崎（退房南下，順路停點）', meal: 'LA CITTADELLA 美食街', budget: '¥4,000',
+                area: '川崎',
+                items: [
                     { time: '上午', desc: '淺草飯店退房，搭車前往川崎方向。' },
                     { time: '中午–下午', desc: 'LA CITTADELLA 義式商街 — 義大利風情的複合商業街區，午餐＋逛街。' },
                     { time: '下午–傍晚', desc: '川崎大師（平間寺）— 知名消災解厄佛寺參拜。入住新橫濱最佳西方菲諾酒店（2晚，川崎到新橫濱約 15 分）。' }
+                ],
+                places: [
+                    { name: 'LA CITTADELLA', lat: 35.5312, lng: 139.7032, desc: '義大利風情的複合商業街區' },
+                    { name: '大師平間寺 (川崎大師)', lat: 35.5340, lng: 139.7300, desc: '知名消災解厄佛寺' }
                 ]
             },
             {
-                day: 7, date: '8/23 日', title: '鎌倉古都・江之島海線', meal: '小町通小吃／江之島海鮮丼', budget: '¥4,500', items: [
+                day: 7, title: '鎌倉古都・江之島海線', meal: '小町通小吃／江之島海鮮丼', budget: '¥4,500',
+                area: '鎌倉・江之島',
+                items: [
                     { time: '上午', desc: '搭 JR 橫須賀線（加購綠色車廂直達省力）。鶴岡八幡宮參拜、小町通商店街吃喝。' },
                     { time: '中午', desc: '報國寺 — 幽靜竹林庭園品抹茶靜心。' },
                     { time: '下午', desc: '高德院鎌倉大佛、長谷寺眺望湘南海景。' },
                     { time: '傍晚', desc: '鎌倉高校前平交道（灌籃高手場景）、搭江之電海線到江之島看夕陽。長輩可搭電扶梯上山。' }
+                ],
+                places: [
+                    { name: '鶴岡八幡宮', lat: 35.3261, lng: 139.5564, desc: '鎌倉最重要的信仰中心' },
+                    { name: '小町通商店街', lat: 35.3233, lng: 139.5539, desc: '吃喝玩樂通通有的熱鬧老街' },
+                    { name: '報國寺 (竹林)', lat: 35.3200, lng: 139.5693, desc: '可以在美麗竹林中品味抹茶' },
+                    { name: '高德院鎌倉大佛', lat: 35.3167, lng: 139.5360, desc: '鎌倉最具代表性的露天大佛' },
+                    { name: '鎌倉長谷寺', lat: 35.3118, lng: 139.5318, desc: '賞花與眺望海景的絕佳地點' },
+                    { name: '高校前平交道', lat: 35.3067, lng: 139.5006, desc: '灌籃高手經典名場面' },
+                    { name: '海邊火車 (江之電)', lat: 35.3060, lng: 139.5100, desc: '緊鄰湘南海岸的美麗復古電車' },
+                    { name: '江之島', lat: 35.3000, lng: 139.4806, desc: '擁有海景、神社與美食的度假小島' }
                 ]
             },
             {
-                day: 8, date: '8/24 一', title: '橫濱觀光・換宿橫濱站東口', meal: '橫濱中華街道地料理', budget: '¥4,000', items: [
+                day: 8, title: '橫濱觀光・換宿橫濱站東口', meal: '橫濱中華街道地料理', budget: '¥4,000',
+                area: '橫濱',
+                items: [
                     { time: '上午', desc: '新橫濱菲諾退房。前往橫濱紅磚倉庫 — 海景文創商場散步拍照，關內歐風街區順遊。' },
                     { time: '中午', desc: '橫濱中華街 — 日本最大中華街，道地午餐，包子小吃邊走邊吃。' },
-                    { time: '下午', desc: '移動至橫濱站東口的相鐵 Fresa Inn 入住、放行李（新橫濱↔橫濱站僅約 10 分，輕鬆）。' },
+                    { time: '下午', desc: '移動至橫濱站東口的相鐵 Fresa Inn 入住、放行李（新橫濱↔橫濱站僅約 10 分，輕鬆）。時間有餘可順遊新橫濱拉麵博物館。' },
                     { time: '傍晚', desc: '橫濱站東口周邊晚餐與採買（站前百貨、相鐵 JOINUS）。' },
                     { time: '19:30–20:00', desc: '🎆 花火節 — 欣賞夏夜煙火（約 30 分鐘）。建議提早到會場卡位；散場人潮多，留意回飯店動線。' },
                     { time: '晚上', desc: '回相鐵 Fresa Inn 休息、整理行李，準備隔日返程。' }
+                ],
+                places: [
+                    { name: '橫濱紅磚倉庫', lat: 35.4526, lng: 139.6429, desc: '百年倉庫改建的文創與海景商場' },
+                    { name: '橫濱關內', lat: 35.4436, lng: 139.6366, desc: '充滿歷史西洋建築的歐風街區' },
+                    { name: '橫濱中華街', lat: 35.4430, lng: 139.6465, desc: '日本最大的中華街，美食林立' },
+                    { name: '拉麵博物館', lat: 35.5064, lng: 139.6148, desc: '懷舊拉麵主題樂園（時間有餘可加）' }
                 ]
             },
             {
-                day: 9, date: '8/25 二', title: '滿載而歸', meal: '機場／機上餐', budget: '¥2,000', items: [
+                day: 9, title: '滿載而歸', meal: '機場／機上餐', budget: '¥2,000',
+                items: [
                     { time: '上午', desc: '相鐵 Fresa Inn 退房。橫濱站前百貨／藥妝最後採買。橫濱站搭「N\'EX 成田特快」直達成田（約 85–90 分），建議搭 9:30 左右的車，抵達約 11:00，留足國際線報到時間（為求保險）。' },
                     { time: '14:25', desc: '長榮 BR197 從成田 T1 起飛。' },
                     { time: '17:05', desc: '抵達桃園 T2，帶著滿滿回憶回家！' }
-                ]
+                ],
+                places: []
             }
         ];
 
@@ -1689,10 +1592,69 @@
             '#06b6d4', '#6366f1', '#a855f7', '#ec4899', '#0ea5e9'
         ];
 
+        const HOTEL_COLOR = '#14b8a6', AIRPORT_COLOR = '#64748b';
+
+        // ========== 導航交通方式 (Google Maps travelmode) ==========
+        // 日本旅遊以電車為主，預設「大眾運輸」；切換後所有標記的導航連結一起改。
+        const TRAVEL_MODES = { transit: '大眾運輸', walking: '步行', driving: '計程車' };
+        let travelMode = 'transit';
+
+        function navUrlFor(lat, lng) {
+            return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=${travelMode}`;
+        }
+
+        // 統一產生景點／住宿機場的彈窗內容，切換交通方式時可整批重建
+        function buildPopupHtml(d) {
+            const isPlace = d.kind === 'place';
+            const color = isPlace
+                ? (d.type === 'airport' ? AIRPORT_COLOR : HOTEL_COLOR)
+                : (dayColors[d.day - 1] || 'var(--primary-500)');
+            const badge = isPlace
+                ? `${d.emoji} ${d.type === 'airport' ? '機場' : '住宿'}`
+                : `DAY ${d.day} · ${fmtDate(d.day)}`;
+
+            return `<div style="font-family:'Noto Sans TC',sans-serif;padding:4px 0;min-width:150px">` +
+                `<span style="display:inline-block;background:${color};color:#fff;font-size:11px;font-weight:700;` +
+                `padding:2px 8px;border-radius:5px;margin-bottom:5px;">${badge}</span><br>` +
+                `<b style="font-size:14px;color:#1e293b">${d.name}</b><br>` +
+                `<span style="color:#64748b;font-size:12px;line-height:1.6">${d.desc}</span><br>` +
+                `<a href="${navUrlFor(d.lat, d.lng)}" target="_blank" rel="noopener" ` +
+                `style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:5px 12px;` +
+                `background:${color};color:#fff;font-size:12px;font-weight:700;border-radius:8px;text-decoration:none;">` +
+                `🧭 ${TRAVEL_MODES[travelMode]}導航</a></div>`;
+        }
+
+        function updateTravelModeUI() {
+            document.querySelectorAll('.tm-btn').forEach(b => {
+                const on = b.dataset.mode === travelMode;
+                b.classList.toggle('on', on);
+                b.setAttribute('aria-pressed', String(on));
+            });
+        }
+
+        function setTravelMode(mode) {
+            if (!TRAVEL_MODES[mode]) return;
+            travelMode = mode;
+            saveState({ travelMode: mode });
+            updateTravelModeUI();
+            // 重建所有已建立的彈窗（開著的會即時換掉）
+            allMarkers.concat(placeMarkers).forEach(m => {
+                if (m._data) m.setPopupContent(buildPopupHtml(m._data));
+            });
+        }
+
         // ========== Trip Date Helpers ==========
+        // 全站唯一的「Day N ↔ 日期」來源：改行程日期只需要改這一行
         // Day 1 = 2026-08-17 … Day 9 = 2026-08-25
         const tripDayDate = (day) => new Date(2026, 7, 16 + day);
         const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+        const WEEKDAY_TW = ['日', '一', '二', '三', '四', '五', '六'];
+        const fmtDate = (day) => {
+            const d = tripDayDate(day);
+            return `${d.getMonth() + 1}/${d.getDate()}`;
+        };
+        const fmtDateFull = (day) => `${fmtDate(day)} ${WEEKDAY_TW[tripDayDate(day).getDay()]}`;
 
         function getTodayDayNumber() {
             const today = midnight(new Date()).getTime();
@@ -1733,8 +1695,8 @@
                 </div>
             `).join('');
 
-            // Days that have map points (2–8) get a cross-link to the map
-            const hasMap = day.day >= 2 && day.day <= 8;
+            // 有地圖點位的那幾天才顯示「在地圖查看這天」
+            const hasMap = (day.places || []).length > 0;
             const mapLinkHtml = hasMap ? `
                 <button class="day-map-link" style="color:${color}" onclick="viewDayOnMap(${day.day})">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1772,7 +1734,7 @@
                      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleDetails(${index})}">
                     <div class="day-number" style="color: ${color};">${day.day}</div>
                     <div class="day-info">
-                        <div class="day-label">DAY ${day.day}${day.date ? ' · ' + day.date : ''}${todayBadge}</div>
+                        <div class="day-label">DAY ${day.day} · ${fmtDateFull(day.day)}${todayBadge}</div>
                         <div class="day-title">${day.title}</div>
                     </div>
                     <svg class="day-chevron" id="icon-${index}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1847,6 +1809,8 @@
         let placeMarkers = [];
         let routeLayer = null;
         let routesVisible = true;
+        let railLayer = null;
+        let railVisible = false;
 
         function switchTab(tab) {
             // Toggle views
@@ -1868,8 +1832,10 @@
 
             btnItinerary.classList.toggle('active', tab === 'itinerary');
             btnMap.classList.toggle('active', tab === 'map');
-            btnItinerary.setAttribute('aria-selected', String(tab === 'itinerary'));
-            btnMap.setAttribute('aria-selected', String(tab === 'map'));
+            // 這兩顆是同頁切換，用 aria-current 標示目前所在頁面
+            const setCurrent = (el, on) => on ? el.setAttribute('aria-current', 'page') : el.removeAttribute('aria-current');
+            setCurrent(btnItinerary, tab === 'itinerary');
+            setCurrent(btnMap, tab === 'map');
 
             // Slide the gradient pill to the active tab
             pill.classList.toggle('right', tab === 'map');
@@ -1878,7 +1844,7 @@
             if (tab === 'map') {
                 if (!mapInitialized) {
                     setTimeout(initMap, 120);
-                } else {
+                } else if (map) {
                     setTimeout(() => map.invalidateSize(), 60);
                 }
             }
@@ -1954,6 +1920,25 @@
             if (btn) btn.style.opacity = routesVisible ? '1' : '0.45';
         }
 
+        // 疊加鐵道路線圖（OpenRailwayMap），看得出 JR／地鐵路線與車站位置
+        function toggleRail(force) {
+            if (!map) return;
+            if (!railLayer) {
+                railLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    opacity: 0.85,
+                    attribution: '鐵道圖 &copy; <a href="https://www.openrailwaymap.org/" target="_blank" rel="noopener">OpenRailwayMap</a>'
+                });
+            }
+            railVisible = typeof force === 'boolean' ? force : !railVisible;
+            if (railVisible) railLayer.addTo(map);
+            else map.removeLayer(railLayer);
+
+            const btn = document.getElementById('btn-rail');
+            if (btn) btn.classList.toggle('is-on', railVisible);
+            saveState({ rail: railVisible });
+        }
+
         // Zoom the map to a specific day's markers and open them (legend / cross-link)
         function zoomToDay(day) {
             if (!map) return;
@@ -1974,8 +1959,36 @@
             ms[0].openPopup();
         }
 
+        // Leaflet 來自 CDN，沒網路時 L 會是 undefined，原本會靜默失敗只留一塊空白。
+        // 這裡改成列出所有景點的 Google Maps 連結，離線時至少還能導航。
+        function showMapFallback() {
+            const el = document.getElementById('map');
+            if (!el) return;
+            document.querySelector('.map-fullscreen').classList.add('no-map');
+
+            const days = itinerary.filter(d => (d.places || []).length > 0).map(d => {
+                const links = d.places.map(p =>
+                    `<a href="${navUrlFor(p.lat, p.lng)}" target="_blank" rel="noopener">📍 ${p.name}</a>`).join('');
+                return `<div class="fb-day">` +
+                    `<div class="fb-head" style="background:${dayColors[d.day - 1]}">DAY ${d.day} · ${fmtDate(d.day)}　${d.area || ''}</div>` +
+                    `<div class="fb-links">${links}</div></div>`;
+            }).join('');
+
+            el.innerHTML = `<div class="map-fallback">` +
+                `<div class="fb-title">⚠️ 地圖載入失敗</div>` +
+                `<div class="fb-sub">通常是目前沒有網路連線。行程總覽與行李清單不受影響；` +
+                `下面的景點可以直接用 Google Maps 開啟，恢復連線後重新整理即可看到地圖。</div>` +
+                days + `</div>`;
+        }
+
         // ========== Leaflet Map ==========
         function initMap() {
+            if (typeof L === 'undefined') {
+                showMapFallback();
+                mapInitialized = true;   // 別每次切分頁都重試
+                return;
+            }
+
             map = L.map('map', {
                 zoomControl: false  // we'll add it in a better position
             }).setView([35.6895, 139.7300], 11);
@@ -2016,76 +2029,22 @@
                 });
             }
 
-            // 每個景點標上對應的行程天數 (day)，標記顏色／編號與「行程總覽」卡片一致
-            const locations = [
-                // DAY 2 (8/18) 淺草・晴空塔
-                { name: '淺草寺', lat: 35.7147, lng: 139.7966, day: 2, desc: '雷門大燈籠與仲見世通商店街' },
-                { name: '晴空塔', lat: 35.7100, lng: 139.8107, day: 2, desc: '東京地標，可俯瞰市區全景' },
-                // DAY 3 (8/19) 原宿・明治神宮・新宿
-                { name: '明治神宮', lat: 35.6763, lng: 139.6993, day: 3, desc: '都市中的廣闊森林與神聖氛圍' },
-                { name: 'Kiddy Land', lat: 35.6696, lng: 139.7047, day: 3, desc: '原宿知名玩具與動漫雜貨旗艦店' },
-                { name: '新宿御苑', lat: 35.6852, lng: 139.7100, day: 3, desc: '絕美廣闊的日式庭園' },
-                { name: '迪士尼旗艦店', lat: 35.6917, lng: 139.7034, day: 3, desc: '日本最大規模的 Disney Flagship Tokyo' },
-                { name: '東京都廳', lat: 35.6896, lng: 139.6917, day: 3, desc: '免費高空展望台，看夜景好去處' },
-                { name: '思出横丁', lat: 35.6923, lng: 139.6995, day: 3, desc: '懷舊的復古串燒居酒屋小巷' },
-                // DAY 4 (8/20) 上野・澀谷
-                { name: '上野公園', lat: 35.7146, lng: 139.7734, day: 4, desc: '廣大綠地，適合散步賞景' },
-                { name: '忠犬八公像', lat: 35.6590, lng: 139.7006, day: 4, desc: '澀谷最著名的會面地標' },
-                { name: '十字路口', lat: 35.6595, lng: 139.7000, day: 4, desc: '全世界最繁忙的十字路口' },
-                { name: '澀谷丸井百貨', lat: 35.6612, lng: 139.7005, day: 4, desc: '熱門購物與流行指標' },
-                { name: 'Parco (澀谷)', lat: 35.6622, lng: 139.6987, day: 4, desc: '潮流品牌與任天堂旗艦店所在地' },
-                { name: '宮下公園', lat: 35.6619, lng: 139.7019, day: 4, desc: '結合商場與頂樓公園的複合設施' },
-                { name: 'のんべい横丁', lat: 35.6602, lng: 139.7014, day: 4, desc: '澀谷車站旁的昭和風小酒館街' },
-                // DAY 5 (8/21) 日本橋・銀座・東京鐵塔
-                { name: '寶可夢中心 (Tokyo DX)', lat: 35.6815, lng: 139.7745, day: 5, desc: '日本橋／東京站周邊，寶可夢愛好者天堂' },
-                { name: '銀座', lat: 35.6712, lng: 139.7665, day: 5, desc: '高級百貨與優雅下午茶' },
-                { name: '東京鐵塔', lat: 35.6586, lng: 139.7454, day: 5, desc: '經典不朽的紅色鐵塔地標' },
-                // DAY 6 (8/22) 川崎（退房南下順遊）
-                { name: 'LA CITTADELLA', lat: 35.5312, lng: 139.7032, day: 6, desc: '義大利風情的複合商業街區' },
-                { name: '大師平間寺 (川崎大師)', lat: 35.5340, lng: 139.7300, day: 6, desc: '知名消災解厄佛寺' },
-                // DAY 7 (8/23) 鎌倉・江之島
-                { name: '鶴岡八幡宮', lat: 35.3261, lng: 139.5564, day: 7, desc: '鎌倉最重要的信仰中心' },
-                { name: '小町通商店街', lat: 35.3233, lng: 139.5539, day: 7, desc: '吃喝玩樂通通有的熱鬧老街' },
-                { name: '報國寺 (竹林)', lat: 35.3200, lng: 139.5693, day: 7, desc: '可以在美麗竹林中品味抹茶' },
-                { name: '高德院鎌倉大佛', lat: 35.3167, lng: 139.5360, day: 7, desc: '鎌倉最具代表性的露天大佛' },
-                { name: '鎌倉長谷寺', lat: 35.3118, lng: 139.5318, day: 7, desc: '賞花與眺望海景的絕佳地點' },
-                { name: '高校前平交道', lat: 35.3067, lng: 139.5006, day: 7, desc: '灌籃高手經典名場面' },
-                { name: '海邊火車 (江之電)', lat: 35.3060, lng: 139.5100, day: 7, desc: '緊鄰湘南海岸的美麗復古電車' },
-                { name: '江之島', lat: 35.3000, lng: 139.4806, day: 7, desc: '擁有海景、神社與美食的度假小島' },
-                // DAY 8 (8/24) 橫濱（觀光後換宿橫濱站東口）
-                { name: '橫濱紅磚倉庫', lat: 35.4526, lng: 139.6429, day: 8, desc: '百年倉庫改建的文創與海景商場' },
-                { name: '橫濱關內', lat: 35.4436, lng: 139.6366, day: 8, desc: '充滿歷史西洋建築的歐風街區' },
-                { name: '橫濱中華街', lat: 35.4430, lng: 139.6465, day: 8, desc: '日本最大的中華街，美食林立' },
-                { name: '拉麵博物館', lat: 35.5064, lng: 139.6148, day: 8, desc: '懷舊拉麵主題樂園（時間有餘可加）' }
-            ];
-
-            const dayDates = ['', '8/17', '8/18', '8/19', '8/20', '8/21', '8/22', '8/23', '8/24', '8/25'];
+            // 地圖點位直接展開自行程資料，不再另外維護一份（day 由所屬那天帶入）
+            const locations = itinerary.flatMap(d =>
+                (d.places || []).map(p => Object.assign({ day: d.day }, p)));
 
             locations.forEach(loc => {
-                const color = dayColors[loc.day - 1] || 'var(--primary-500)';
                 const marker = L.marker([loc.lat, loc.lng], {
                     icon: makeDayIcon(loc.day)
                 }).addTo(map);
                 marker._tripDay = loc.day;
-
-                const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
-                marker.bindPopup(
-                    `<div style="font-family:'Noto Sans TC',sans-serif;padding:4px 0;min-width:150px">` +
-                    `<span style="display:inline-block;background:${color};color:#fff;font-size:11px;font-weight:700;` +
-                    `padding:2px 8px;border-radius:5px;margin-bottom:5px;">DAY ${loc.day} · ${dayDates[loc.day]}</span><br>` +
-                    `<b style="font-size:14px;color:#1e293b">${loc.name}</b><br>` +
-                    `<span style="color:#64748b;font-size:12px;line-height:1.6">${loc.desc}</span><br>` +
-                    `<a href="${navUrl}" target="_blank" rel="noopener" ` +
-                    `style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:5px 12px;` +
-                    `background:${color};color:#fff;font-size:12px;font-weight:700;border-radius:8px;text-decoration:none;">` +
-                    `🧭 Google Maps 導航</a></div>`
-                );
+                marker._data = Object.assign({ kind: 'day' }, loc);
+                marker.bindPopup(buildPopupHtml(marker._data));
 
                 allMarkers.push(marker);
             });
 
             // ===== 住宿與機場 =====
-            const HOTEL_COLOR = '#14b8a6', AIRPORT_COLOR = '#64748b';
             const places = [
                 { name: '格拉斯麗淺草酒店', lat: 35.7118, lng: 139.7966, type: 'hotel', emoji: '🏨', desc: '8/17–8/22 入住（5晚）・淺草' },
                 { name: '新橫濱最佳西方菲諾酒店', lat: 35.5078, lng: 139.6172, type: 'hotel', emoji: '🏨', desc: '8/22–8/24 入住（2晚）・新橫濱' },
@@ -2095,60 +2054,50 @@
 
             places.forEach(p => {
                 const color = p.type === 'airport' ? AIRPORT_COLOR : HOTEL_COLOR;
-                const label = p.type === 'airport' ? '機場' : '住宿';
                 const marker = L.marker([p.lat, p.lng], { icon: makePlaceIcon(p.emoji, color) }).addTo(map);
                 marker._placeType = p.type;
-                const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
-                marker.bindPopup(
-                    `<div style="font-family:'Noto Sans TC',sans-serif;padding:4px 0;min-width:150px">` +
-                    `<span style="display:inline-block;background:${color};color:#fff;font-size:11px;font-weight:700;` +
-                    `padding:2px 8px;border-radius:5px;margin-bottom:5px;">${p.emoji} ${label}</span><br>` +
-                    `<b style="font-size:14px;color:#1e293b">${p.name}</b><br>` +
-                    `<span style="color:#64748b;font-size:12px;line-height:1.6">${p.desc}</span><br>` +
-                    `<a href="${navUrl}" target="_blank" rel="noopener" ` +
-                    `style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:5px 12px;` +
-                    `background:${color};color:#fff;font-size:12px;font-weight:700;border-radius:8px;text-decoration:none;">` +
-                    `🧭 Google Maps 導航</a></div>`
-                );
+                marker._data = Object.assign({ kind: 'place' }, p);
+                marker.bindPopup(buildPopupHtml(marker._data));
                 placeMarkers.push(marker);
             });
 
-            // Build day-color legend, linked to itinerary days
-            const legendAreas = {
-                2: '淺草・晴空塔', 3: '原宿・新宿', 4: '上野・澀谷', 5: '銀座・日本橋',
-                6: '川崎', 7: '鎌倉・江之島', 8: '橫濱'
-            };
+            // 圖例只列出真的有標記的那幾天（區域名稱來自行程資料的 area）
             const legend = document.getElementById('map-legend');
+            const mappedDays = itinerary.filter(d => (d.places || []).length > 0);
             if (legend) {
-                legend.innerHTML = Object.keys(legendAreas).map(d => {
-                    const color = dayColors[d - 1] || '#6366f1';
-                    return `<div class="legend-item" onclick="zoomToDay(${d})">` +
-                        `<span class="legend-dot" style="background:${color}">${d}</span>` +
-                        `<span>${legendAreas[d]}</span></div>`;
-                }).join('') +
-                    `<div class="legend-item legend-place" onclick="focusPlaces('hotel')">` +
-                    `<span class="legend-dot" style="background:#fff;border-color:#14b8a6;font-size:10px">🏨</span>` +
-                    `<span>住宿</span></div>` +
-                    `<div class="legend-item legend-place" onclick="focusPlaces('airport')">` +
-                    `<span class="legend-dot" style="background:#fff;border-color:#64748b;font-size:10px">✈️</span>` +
-                    `<span>機場</span></div>`;
+                const keyRow = (onclick, dotStyle, dot, label) =>
+                    `<div class="legend-item${dotStyle.place ? ' legend-place' : ''}" role="button" tabindex="0" ` +
+                    `onclick="${onclick}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${onclick}}">` +
+                    `<span class="legend-dot" style="${dotStyle.css}">${dot}</span><span>${label}</span></div>`;
+
+                legend.innerHTML = mappedDays.map(d =>
+                    keyRow(`zoomToDay(${d.day})`,
+                        { css: `background:${dayColors[d.day - 1] || '#6366f1'}` },
+                        d.day, d.area || d.title)
+                ).join('') +
+                    keyRow(`focusPlaces('hotel')`,
+                        { place: true, css: `background:#fff;border-color:${HOTEL_COLOR};font-size:10px` }, '🏨', '住宿') +
+                    keyRow(`focusPlaces('airport')`,
+                        { place: true, css: `background:#fff;border-color:${AIRPORT_COLOR};font-size:10px` }, '✈️', '機場');
             }
 
-            // Draw a colored route line per day (locations are in visiting order)
+            // Draw a colored route line per day (places are in visiting order)
             routeLayer = L.layerGroup().addTo(map);
-            for (let d = 2; d <= 8; d++) {
-                const pts = locations.filter(l => l.day === d).map(l => [l.lat, l.lng]);
-                if (pts.length < 2) continue;
-                L.polyline(pts, {
-                    color: dayColors[d - 1],
+            mappedDays.forEach(d => {
+                if (d.places.length < 2) return;
+                L.polyline(d.places.map(p => [p.lat, p.lng]), {
+                    color: dayColors[d.day - 1],
                     weight: 3,
                     opacity: 0.55,
                     dashArray: '6 8',
                     lineJoin: 'round'
                 }).addTo(routeLayer);
-            }
+            });
 
             mapInitialized = true;
+
+            // 還原上次的鐵道圖層開關
+            if (loadState().rail) toggleRail(true);
 
             // Auto fade out the hint chip after 3 seconds
             setTimeout(() => {
@@ -2208,7 +2157,7 @@
             if (!strip) return;
             strip.innerHTML = itinerary.map((day, i) => {
                 const color = dayColors[i];
-                const dateNum = day.date.split(' ')[0];
+                const dateNum = fmtDate(day.day);
                 const isToday = todayDay === day.day;
                 return `<div class="date-pill ${isToday ? 'today' : ''}" style="color:${color}" ` +
                     `onclick="jumpToDay(${i})" title="${day.title}">` +
@@ -2224,22 +2173,49 @@
         }
 
         // ========== Search / Filter ==========
+        // 搜尋會強制展開命中的卡片，這裡記住搜尋前的狀態，清除搜尋時還原
+        let preSearchExpanded = null;
+
+        const isExpanded = (i) => {
+            const b = document.getElementById(`details-${i}`);
+            return !!b && b.classList.contains('expanded');
+        };
+
         function filterItinerary(q) {
             q = (q || '').trim().toLowerCase();
             const box = document.getElementById('trip-search');
             if (box) box.classList.toggle('has-text', q.length > 0);
+
+            if (q && !preSearchExpanded) {
+                preSearchExpanded = itinerary.map((d, i) => isExpanded(i));
+            }
+
+            let hits = 0;
             itinerary.forEach((day, i) => {
                 const card = document.getElementById(`day-card-${i}`);
                 if (!card) return;
-                const hay = (day.title + ' ' + day.date + ' ' + (day.meal || '') + ' ' +
-                    day.items.map(t => t.desc).join(' ')).toLowerCase();
+                // 搜尋範圍含地圖景點名稱，「拉麵博物館」這種只出現在地圖的點也找得到
+                const hay = [
+                    day.title, fmtDateFull(day.day), day.meal || '', day.area || '',
+                    ...day.items.map(t => t.desc),
+                    ...(day.places || []).map(p => `${p.name} ${p.desc}`)
+                ].join(' ').toLowerCase();
+
                 const match = !q || hay.includes(q);
                 card.style.display = match ? '' : 'none';
-                if (q && match) {
-                    const body = document.getElementById(`details-${i}`);
-                    if (body && !body.classList.contains('expanded')) toggleDetails(i, true);
-                }
+                if (match) hits++;
+                if (q && match && !isExpanded(i)) toggleDetails(i, true);
             });
+
+            if (!q && preSearchExpanded) {
+                preSearchExpanded.forEach((wasOpen, i) => {
+                    if (isExpanded(i) !== wasOpen) toggleDetails(i, true);
+                });
+                preSearchExpanded = null;
+            }
+
+            const empty = document.getElementById('search-empty');
+            if (empty) empty.style.display = (q && hits === 0) ? 'block' : 'none';
         }
         function clearSearch() {
             const inp = document.getElementById('search-input');
@@ -2266,17 +2242,22 @@
             updateTripStatus();
             buildDateStrip();
 
+            // 還原導航交通方式（預設大眾運輸）
+            if (TRAVEL_MODES[s.travelMode]) travelMode = s.travelMode;
+            updateTravelModeUI();
+
             const inp = document.getElementById('search-input');
             if (inp) inp.addEventListener('input', e => filterItinerary(e.target.value));
 
-            // Restore last tab (map needs lazy init via switchTab)
-            if (s.tab === 'map') switchTab('map');
+            // ?view=map (從行李頁的「地圖」導覽進來) 優先，其次才還原上次的分頁
+            const wantMap = new URLSearchParams(location.search).get('view') === 'map';
+            if (wantMap || s.tab === 'map') switchTab('map');
 
             // Auto-scroll to today's card during the trip
             if (todayDay) {
                 setTimeout(() => {
                     const card = document.getElementById(`day-card-${todayDay - 1}`);
-                    if (card && (!s.tab || s.tab === 'itinerary')) {
+                    if (card && !wantMap && (!s.tab || s.tab === 'itinerary')) {
                         card.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 }, 500);
