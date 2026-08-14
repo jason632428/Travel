@@ -7,6 +7,9 @@
     <title>行李打包清單 · 家族東京9日遊</title>
     <meta name="description" content="家族東京9日遊行李打包清單：隨身／託運分區、通用清單、旅程專屬提醒與回程採購清單">
 
+    <!-- 閒置時先抓好行程頁，按下導覽鍵才不會等 -->
+    <link rel="prefetch" href="index.html">
+
     <!-- 加到手機主畫面（PWA） -->
     <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#6366f1">
@@ -414,6 +417,15 @@
 </head>
 
 <body>
+    <script>
+        // 在首次繪製前套用主題，避免換頁時閃一下白底（boot() 才套用會來不及）
+        try {
+            var _s = JSON.parse(localStorage.getItem('tokyo-trip-state-v1')) || {};
+            var _dark = typeof _s.dark === 'boolean' ? _s.dark
+                : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (_dark) document.body.classList.add('dark');
+        } catch (e) { /* localStorage 不可用就照原本流程 */ }
+    </script>
     <!-- ========== Header ========== -->
     <header class="app-header">
         <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="切換深色／淺色"
@@ -475,7 +487,7 @@
         <div class="nav-container">
             <div class="nav-pill far-right" id="nav-pill"></div>
 
-            <a href="index.html" class="nav-btn">
+            <a href="index.html" class="nav-btn" onclick="navPress(this, 1)">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
@@ -484,7 +496,7 @@
                 <span>行程</span>
             </a>
 
-            <a href="index.html?view=map" class="nav-btn">
+            <a href="index.html?view=map" class="nav-btn" onclick="navPress(this, 2)">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
@@ -671,6 +683,15 @@
                 ]
             }
         ];
+
+
+        // 跨頁的導覽鍵：按下當下先把膠囊滑過去，換頁需要時間，不能讓使用者以為沒按到
+        function navPress(btn, pos) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const pill = document.getElementById('nav-pill');
+            if (pill) pill.className = 'nav-pill' + (pos === 2 ? ' right' : pos === 3 ? ' far-right' : '');
+        }
 
         // ========== Trip Date Helpers（與 index.html 同一套）==========
         const tripDayDate = (day) => new Date(2026, 7, 16 + day);
@@ -903,10 +924,15 @@
 
             // 還原展開狀態；第一次進來預設展開「隨身行李」與「託運行李」
             const toOpen = Array.isArray(s.luggageOpen) ? s.luggageOpen : ['carry', 'checked'];
-            setTimeout(() => toOpen.forEach(id => {
+            // 直接展開且不播動畫：延遲展開會讓剛進頁面時多「動一下」
+            toOpen.forEach(id => {
                 const body = document.getElementById(`body-${id}`);
-                if (body && !body.classList.contains('expanded')) setSectionOpen(id, true);
-            }), 120);
+                if (!body || body.classList.contains('expanded')) return;
+                body.style.transition = 'none';
+                setSectionOpen(id, true);
+                body.offsetHeight;              // 強制 reflow，讓 transition:none 生效
+                body.style.transition = '';
+            });
         })();
     </script>
 </body>

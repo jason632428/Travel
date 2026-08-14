@@ -7,6 +7,9 @@
     <title>家族東京9日遊</title>
     <meta name="description" content="家族東京9日旅遊行程規劃，涵蓋景點地圖、交通攻略與每日行程安排">
 
+    <!-- 閒置時先抓好行李頁，按下導覽鍵才不會等 -->
+    <link rel="prefetch" href="luggage.html">
+
     <!-- 加到手機主畫面（PWA） -->
     <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#6366f1">
@@ -1161,6 +1164,15 @@
 </head>
 
 <body>
+    <script>
+        // 在首次繪製前套用主題，避免換頁時閃一下白底（boot() 才套用會來不及）
+        try {
+            var _s = JSON.parse(localStorage.getItem('tokyo-trip-state-v1')) || {};
+            var _dark = typeof _s.dark === 'boolean' ? _s.dark
+                : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (_dark) document.body.classList.add('dark');
+        } catch (e) { /* localStorage 不可用就照原本流程 */ }
+    </script>
     <!-- ========== Header ========== -->
     <header class="app-header">
         <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="切換深色／淺色" aria-label="切換深色／淺色模式">
@@ -1439,7 +1451,7 @@
                 <span>地圖</span>
             </button>
 
-            <a href="luggage.html" id="tab-btn-luggage" class="nav-btn">
+            <a href="luggage.html" id="tab-btn-luggage" class="nav-btn" onclick="navPress(this, 3)">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 6V4.5A1.5 1.5 0 0110.5 3h3A1.5 1.5 0 0115 4.5V6m-9 0h12a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2zm4 3v8m4-8v8">
@@ -1800,12 +1812,15 @@
             if (Array.isArray(s.expanded)) toOpen = s.expanded;
             else if (todayDay) toOpen = [todayDay - 1];
             else toOpen = [0, 1];
-            setTimeout(() => {
-                toOpen.forEach(i => {
-                    const body = document.getElementById(`details-${i}`);
-                    if (body && !body.classList.contains('expanded')) toggleDetails(i, true);
-                });
-            }, 150);
+            // 直接展開且不播動畫：延遲展開會讓剛進頁面時多「動一下」
+            toOpen.forEach(i => {
+                const body = document.getElementById(`details-${i}`);
+                if (!body || body.classList.contains('expanded')) return;
+                body.style.transition = 'none';
+                toggleDetails(i, true);
+                body.offsetHeight;              // 強制 reflow，讓 transition:none 生效
+                body.style.transition = '';
+            });
         })();
 
         // ========== Tab Switching ==========
@@ -1844,7 +1859,8 @@
             setCurrent(btnMap, tab === 'map');
 
             // Slide the gradient pill to the active tab
-            pill.classList.toggle('right', tab === 'map');
+            // 用整個 className 設定，順便清掉 navPress 可能留下的 far-right
+            pill.className = 'nav-pill' + (tab === 'map' ? ' right' : '');
 
             // Lazy-init map
             if (tab === 'map') {
@@ -1855,6 +1871,15 @@
                 }
             }
             saveState({ tab });
+        }
+
+
+        // 跨頁的導覽鍵：按下當下先把膠囊滑過去，換頁需要時間，不能讓使用者以為沒按到
+        function navPress(btn, pos) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const pill = document.getElementById('nav-pill');
+            if (pill) pill.className = 'nav-pill' + (pos === 2 ? ' right' : pos === 3 ? ' far-right' : '');
         }
 
         // ========== Cross-link: itinerary → map ==========
