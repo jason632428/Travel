@@ -1870,7 +1870,6 @@
                     setTimeout(() => map.invalidateSize(), 60);
                 }
             }
-            saveState({ tab });
         }
 
 
@@ -2288,9 +2287,10 @@
             const inp = document.getElementById('search-input');
             if (inp) inp.addEventListener('input', e => filterItinerary(e.target.value));
 
-            // ?view=map (從行李頁的「地圖」導覽進來) 優先，其次才還原上次的分頁
+            // 分頁只看網址：導覽的「行程」連到 index.html、「地圖」連到 ?view=map。
+            // 之前還會還原上次看的分頁，結果按「行程」卻跳到地圖，已移除。
             const wantMap = new URLSearchParams(location.search).get('view') === 'map';
-            if (wantMap || s.tab === 'map') {
+            if (wantMap) {
                 // 一進來就在地圖分頁，膠囊直接放到第二格，不要播那段滑動
                 const pill = document.getElementById('nav-pill');
                 pill.style.transition = 'none';
@@ -2303,7 +2303,7 @@
             if (todayDay) {
                 setTimeout(() => {
                     const card = document.getElementById(`day-card-${todayDay - 1}`);
-                    if (card && !wantMap && (!s.tab || s.tab === 'itinerary')) {
+                    if (card && !wantMap) {
                         card.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 }, 500);
