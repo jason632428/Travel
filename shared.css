@@ -1,5 +1,5 @@
 /* ==========================================================================
-   共用樣式：index.html（行程／地圖）、luggage.html（行李清單）、tickets.html（票券）
+   共用樣式：index.html（行程／地圖）、luggage.html（行李清單）、tickets.html（票券，不在導覽中）
    只放三頁真正共用的部分；各頁專屬元件仍寫在各自的 <style> 裡。
    ========================================================================== */
 
@@ -278,11 +278,11 @@ body {
     top: 0;
     bottom: 0;
     left: 0;
-    width: calc((100% - 18px) / 4);
+    width: calc((100% - 12px) / 3);
     border-radius: 999px;
     background: linear-gradient(135deg, var(--primary-500), var(--accent-violet) 60%, var(--accent-pink));
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
     z-index: 0;
 }
 
@@ -303,8 +303,10 @@ body {
     transform: translateX(calc(200% + 12px));
 }
 
-.nav-pill.p4 {
-    transform: translateX(calc(300% + 18px));
+/* 目前頁面不在導覽三格之內（例如票券頁）時，膠囊先收起來，
+   按下某一格才淡入滑過去當作即時回饋 */
+.nav-pill.hidden {
+    opacity: 0;
 }
 
 .nav-btn {
@@ -361,20 +363,13 @@ body {
 }
 
 /* 三個分頁在窄螢幕上要塞得下 */
-@media (max-width: 400px) {
+@media (max-width: 370px) {
     .nav-btn {
         gap: 4px;
     }
 
     .nav-btn span {
-        font-size: 0.66rem;
-    }
-}
-
-/* 真的很窄的機型就只留圖示 */
-@media (max-width: 330px) {
-    .nav-btn span {
-        display: none;
+        font-size: 0.68rem;
     }
 }
 
