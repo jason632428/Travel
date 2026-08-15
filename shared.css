@@ -188,7 +188,9 @@ body {
 }
 
 /* ========== Memo Card ========== */
-/* 左側色條由各頁自己定義（行程頁是漸層，行李頁是單色） */
+/* 行程頁的「旅途備忘錄」與行李頁的「打包大原則」用同一種樣式：
+   圓角卡片 + 左側一條橘。先前行程頁改用 border-image 畫漸層，
+   但 border-image 會套滿四邊並讓 border-radius 失效，兩頁長得不一樣。 */
 .memo-card {
     margin: 16px;
     padding: 18px 18px 18px 22px;
@@ -197,6 +199,7 @@ body {
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
+    border-left: 4px solid var(--accent-coral);
     box-shadow: var(--glass-shadow);
     animation: slideUp 0.5s ease-out both;
 }
