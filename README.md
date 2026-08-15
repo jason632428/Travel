@@ -72,7 +72,7 @@ cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
 
 ## 狀態儲存
 
-三頁共用 localStorage 的 `tokyo-trip-state-v1`：深色模式、目前分頁、展開的行程卡片、導航交通方式、鐵道圖層開關、行李勾選項目。票券的「已使用」標記另存在 `tokyo-tickets-used-v1`。清除瀏覽器資料就會回到預設。
+三頁共用 localStorage 的 `tokyo-trip-state-v1`：深色模式、展開的行程卡片、地圖的日期篩選、導航交通方式、鐵道圖層開關、行李勾選項目。票券的「已使用」標記另存在 `tokyo-tickets-used-v1`。清除瀏覽器資料就會回到預設。
 
 ## 外部依賴
 

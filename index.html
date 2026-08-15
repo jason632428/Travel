@@ -380,10 +380,10 @@
             z-index: 10;
         }
 
-        /* Floating hint chip on the map (在導航模式切換列下方) */
+        /* Floating hint chip on the map (在日期列下方) */
         .map-hint {
             position: absolute;
-            top: 54px;
+            top: 58px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 20;
@@ -399,67 +399,63 @@
             white-space: nowrap;
         }
 
-        /* Day color legend on map */
-        .map-legend {
+        /* ========== 日期篩選列（取代原本的圖例）==========
+           地圖原本把 9 天 38 個標記全部攤開，密集區疊成一團；
+           改成一次只看一天，圖例的「顏色對應」資訊由膠囊本身表達。 */
+        .map-days {
             position: absolute;
             top: 12px;
             left: 12px;
-            z-index: 20;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(160%);
-            -webkit-backdrop-filter: blur(16px) saturate(160%);
-            border: 1px solid var(--glass-border);
-            padding: 10px 12px;
-            border-radius: 14px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+            right: 12px;
+            z-index: 25;
             display: flex;
-            flex-direction: column;
             gap: 5px;
-            max-width: 132px;
+            overflow-x: auto;
+            padding: 5px;
+            border-radius: 999px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
         }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.66rem;
-            color: var(--gray-600);
-            line-height: 1.2;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        /* divider before the 住宿／機場 entries */
-        .legend-item:not(.legend-place) + .legend-place {
-            border-top: 1px solid var(--glass-border);
-            margin-top: 3px;
-            padding-top: 6px;
-        }
-
-        .legend-item:hover {
-            opacity: 0.65;
-        }
-
-        .legend-dot {
-            width: 13px;
-            height: 13px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            border: 1.5px solid #fff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-            color: #fff;
-            font-size: 8px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .day-chip {
+            flex: 0 0 auto;
+            height: 30px;
+            padding: 0 11px;
+            border: none;
+            border-radius: 999px;
+            background: transparent;
             font-family: var(--font-display);
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--gray-600);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Fit-all button on map */
+        .day-chip:active {
+            transform: scale(0.94);
+        }
+
+        .day-chip.on {
+            background: var(--c);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .day-chip.all.on {
+            background: linear-gradient(135deg, var(--primary-500), var(--accent-violet));
+        }
+
+
+        /* 地圖右側按鈕（排在日期列下方） */
         .map-fit-btn {
             position: absolute;
-            top: 12px;
+            top: 58px;
             right: 12px;
             z-index: 20;
             width: 38px;
@@ -681,7 +677,7 @@
 
         /* ========== Focus / A11y ========== */
         .day-card-header:focus-visible,
-        .legend-item:focus-visible {
+        .day-chip:focus-visible {
             outline: 2px solid var(--primary-500);
             outline-offset: -2px;
             border-radius: var(--radius-sm);
@@ -710,7 +706,7 @@
 
         /* ========== Dark Mode（本頁專屬；共用變數在 shared.css）========== */
         body.dark .map-hint,
-        body.dark .map-legend,
+        body.dark .map-days,
         body.dark .map-fit-btn {
             background: rgba(30, 41, 59, 0.92);
             color: var(--gray-600);
@@ -980,9 +976,8 @@
         /* ========== 地圖載入失敗的備援清單 ========== */
         /* Leaflet 走 CDN，沒網路時整個地圖會是空白；這時改列出可直接開 Google Maps 的景點 */
         .map-fullscreen.no-map .map-fit-btn,
-        .map-fullscreen.no-map .map-legend,
-        .map-fullscreen.no-map .map-hint,
-        .map-fullscreen.no-map .travel-mode {
+        .map-fullscreen.no-map .map-days,
+        .map-fullscreen.no-map .map-hint {
             display: none;
         }
 
@@ -1068,33 +1063,29 @@
 
         /* ========== Stacked map buttons ========== */
         .map-fit-btn.second {
-            top: 58px;
-        }
-
-        .map-fit-btn.third {
             top: 104px;
         }
 
-        .map-fit-btn.fourth {
-            top: 150px;
-        }
-
-        /* ========== Travel mode switch (導航交通方式) ========== */
+        /* ========== Travel mode switch (導航交通方式，放在交通攻略抽屜裡) ========== */
         .travel-mode {
-            position: absolute;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 25;
             display: flex;
+            margin-bottom: 14px;
             gap: 3px;
             padding: 4px;
             border-radius: 999px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
+            background: rgba(148, 163, 184, 0.16);
+        }
+
+        .travel-mode .tm-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .tm-label-row {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: 7px;
         }
 
         .tm-btn {
@@ -1124,7 +1115,7 @@
 
         /* 只有選中的模式顯示文字，未選中維持 emoji，橫向不佔空間 */
         .tm-btn .tm-label {
-            display: none;
+            display: inline;
         }
 
         .tm-btn.on {
@@ -1142,7 +1133,7 @@
         }
 
         body.dark .travel-mode {
-            background: rgba(30, 41, 59, 0.92);
+            background: rgba(255, 255, 255, 0.07);
         }
 
         .map-fit-btn.is-on {
@@ -1320,48 +1311,14 @@
             <!-- Map fills the entire area -->
             <div id="map"></div>
 
-            <!-- 導航交通方式：影響所有標記的 Google Maps 導航連結 -->
-            <div class="travel-mode" id="travel-mode" role="group" aria-label="導航交通方式">
-                <button class="tm-btn" data-mode="transit" onclick="setTravelMode('transit')" title="以大眾運輸導航">
-                    <span class="tm-emoji">🚆</span><span class="tm-label">大眾運輸</span>
-                </button>
-                <button class="tm-btn" data-mode="walking" onclick="setTravelMode('walking')" title="以步行導航">
-                    <span class="tm-emoji">🚶</span><span class="tm-label">步行</span>
-                </button>
-                <button class="tm-btn" data-mode="driving" onclick="setTravelMode('driving')" title="以開車／計程車導航">
-                    <span class="tm-emoji">🚕</span><span class="tm-label">計程車</span>
-                </button>
-            </div>
-
             <!-- Floating hint -->
-            <div class="map-hint">📍 標記的顏色與編號對應每日行程</div>
+            <div class="map-hint">👆 點上方日期，只看那一天的景點</div>
 
-            <!-- Day color legend -->
-            <div class="map-legend" id="map-legend"></div>
-
-            <!-- Fit-all button -->
-            <button class="map-fit-btn" id="btn-fit-all" onclick="fitAllMarkers()" title="顯示全部景點">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <polyline points="9 21 3 21 3 15"></polyline>
-                    <line x1="21" y1="3" x2="14" y2="10"></line>
-                    <line x1="3" y1="21" x2="10" y2="14"></line>
-                </svg>
-            </button>
-
-            <!-- Toggle daily route lines -->
-            <button class="map-fit-btn second" id="btn-routes" onclick="toggleRoutes()" title="顯示／隱藏每日路線">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="6" cy="19" r="2"></circle>
-                    <circle cx="18" cy="5" r="2"></circle>
-                    <path d="M8 18.5h6a3.5 3.5 0 000-7H10a3.5 3.5 0 010-7h6" stroke-dasharray="3 2"></path>
-                </svg>
-            </button>
+            <!-- 日期篩選：一次只看一天，取代原本列出全部天數的圖例 -->
+            <div class="map-days no-scrollbar" id="map-days" role="group" aria-label="依日期篩選景點"></div>
 
             <!-- Open transport tips (top-right icon) -->
-            <button class="map-fit-btn third" id="btn-transport" onclick="toggleSheet()" title="交通攻略">
+            <button class="map-fit-btn" id="btn-transport" onclick="toggleSheet()" title="交通攻略">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <rect x="5" y="3" width="14" height="13" rx="3"></rect>
@@ -1373,7 +1330,7 @@
             </button>
 
             <!-- Toggle railway map overlay -->
-            <button class="map-fit-btn fourth" id="btn-rail" onclick="toggleRail()" title="顯示／隱藏鐵道路線圖">
+            <button class="map-fit-btn second" id="btn-rail" onclick="toggleRail()" title="顯示／隱藏鐵道路線圖">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 6h16M4 18h16"></path>
@@ -1395,6 +1352,18 @@
                         </svg>
                     </div>
                     <div class="sheet-content">
+                        <div class="tm-label-row">🧭 景點彈窗的導航方式</div>
+            <div class="travel-mode" id="travel-mode" role="group" aria-label="導航交通方式">
+                <button class="tm-btn" data-mode="transit" onclick="setTravelMode('transit')" title="以大眾運輸導航">
+                    <span class="tm-emoji">🚆</span><span class="tm-label">大眾運輸</span>
+                </button>
+                <button class="tm-btn" data-mode="walking" onclick="setTravelMode('walking')" title="以步行導航">
+                    <span class="tm-emoji">🚶</span><span class="tm-label">步行</span>
+                </button>
+                <button class="tm-btn" data-mode="driving" onclick="setTravelMode('driving')" title="以開車／計程車導航">
+                    <span class="tm-emoji">🚕</span><span class="tm-label">計程車</span>
+                </button>
+            </div>
                         <div class="transport-items">
                             <div class="transport-item transport-green">
                                 <h3>✈️ 機場往返 (Day 1 / Day 9)</h3>
@@ -1829,7 +1798,7 @@
         let allMarkers = [];
         let placeMarkers = [];
         let routeLayer = null;
-        let routesVisible = true;
+        const dayRoutes = {};      // day -> polyline，配合日期篩選單獨開關
         let railLayer = null;
         let railVisible = false;
 
@@ -1933,22 +1902,53 @@
             }, { passive: true });
         })();
 
-        // ========== Fit All Markers ==========
-        function fitAllMarkers() {
-            if (!map || allMarkers.length === 0) return;
-            const group = L.featureGroup(allMarkers);
-            map.fitBounds(group.getBounds().pad(0.08));
+        // ========== 依日期篩選地圖 ==========
+        // 原本一次攤開 9 天 38 個標記，密集區疊成一團；改成一次只看一天。
+        // 住宿與機場不受篩選影響——它們是每天的據點，隨時都需要看得到。
+        let currentMapDay = 'all';
+
+        function showMapDay(day) {
+            if (!map) return;
+            currentMapDay = day;
+
+            allMarkers.forEach(m => {
+                const on = day === 'all' || m._tripDay === day;
+                if (on) m.addTo(map); else map.removeLayer(m);
+            });
+            Object.keys(dayRoutes).forEach(d => {
+                const on = day === 'all' || Number(d) === day;
+                if (on) dayRoutes[d].addTo(routeLayer); else routeLayer.removeLayer(dayRoutes[d]);
+            });
+
+            document.querySelectorAll('.day-chip').forEach(c =>
+                c.classList.toggle('on', c.dataset.day === String(day)));
+
+            // 只框景點：成田機場遠在千葉，算進來會把整個視野拉爛
+            const shown = day === 'all'
+                ? allMarkers
+                : allMarkers.filter(m => m._tripDay === day);
+            if (shown.length) {
+                // 留白避開上方日期列與下方導覽列，否則標記會被蓋住
+                map.fitBounds(L.featureGroup(shown).getBounds(), {
+                    paddingTopLeft: [26, 68],
+                    paddingBottomRight: [26, 120],
+                    maxZoom: 15
+                });
+            }
+            saveState({ mapDay: day });
         }
 
-        // Toggle the daily route lines on the map
-        function toggleRoutes() {
-            if (!map || !routeLayer) return;
-            routesVisible = !routesVisible;
-            if (routesVisible) routeLayer.addTo(map);
-            else map.removeLayer(routeLayer);
-            const btn = document.getElementById('btn-routes');
-            if (btn) btn.style.opacity = routesVisible ? '1' : '0.45';
+        function buildMapDays() {
+            const el = document.getElementById('map-days');
+            if (!el) return;
+            const days = itinerary.filter(d => (d.places || []).length > 0);
+            el.innerHTML =
+                `<button class="day-chip all" data-day="all" onclick="showMapDay('all')">全部</button>` +
+                days.map(d => `<button class="day-chip" data-day="${d.day}" ` +
+                    `style="--c:${dayColors[d.day - 1]}" onclick="showMapDay(${d.day})" ` +
+                    `title="${d.area || d.title}">D${d.day}</button>`).join('');
         }
+
 
         // 疊加鐵道路線圖（OpenRailwayMap），看得出 JR／地鐵路線與車站位置
         function toggleRail(force) {
@@ -1969,24 +1969,9 @@
             saveState({ rail: railVisible });
         }
 
-        // Zoom the map to a specific day's markers and open them (legend / cross-link)
+        // 行程卡片的「在地圖查看這天」：直接切到那天的篩選
         function zoomToDay(day) {
-            if (!map) return;
-            const dayMarkers = allMarkers.filter(m => m._tripDay === day);
-            if (dayMarkers.length === 0) return;
-            const group = L.featureGroup(dayMarkers);
-            map.fitBounds(group.getBounds().pad(0.3), { maxZoom: 15 });
-            dayMarkers[0].openPopup();
-        }
-
-        // Focus the hotels / airport markers (legend)
-        function focusPlaces(type) {
-            if (!map) return;
-            const ms = placeMarkers.filter(m => m._placeType === type);
-            if (ms.length === 0) return;
-            const group = L.featureGroup(ms);
-            map.fitBounds(group.getBounds().pad(0.4), { maxZoom: ms.length === 1 ? 12 : 13 });
-            ms[0].openPopup();
+            showMapDay(day);
         }
 
         // Leaflet 來自 CDN，沒網路時 L 會是 undefined，原本會靜默失敗只留一塊空白。
@@ -2091,31 +2076,13 @@
                 placeMarkers.push(marker);
             });
 
-            // 圖例只列出真的有標記的那幾天（區域名稱來自行程資料的 area）
-            const legend = document.getElementById('map-legend');
             const mappedDays = itinerary.filter(d => (d.places || []).length > 0);
-            if (legend) {
-                const keyRow = (onclick, dotStyle, dot, label) =>
-                    `<div class="legend-item${dotStyle.place ? ' legend-place' : ''}" role="button" tabindex="0" ` +
-                    `onclick="${onclick}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${onclick}}">` +
-                    `<span class="legend-dot" style="${dotStyle.css}">${dot}</span><span>${label}</span></div>`;
 
-                legend.innerHTML = mappedDays.map(d =>
-                    keyRow(`zoomToDay(${d.day})`,
-                        { css: `background:${dayColors[d.day - 1] || '#6366f1'}` },
-                        d.day, d.area || d.title)
-                ).join('') +
-                    keyRow(`focusPlaces('hotel')`,
-                        { place: true, css: `background:#fff;border-color:${HOTEL_COLOR};font-size:10px` }, '🏨', '住宿') +
-                    keyRow(`focusPlaces('airport')`,
-                        { place: true, css: `background:#fff;border-color:${AIRPORT_COLOR};font-size:10px` }, '✈️', '機場');
-            }
-
-            // Draw a colored route line per day (places are in visiting order)
+            // 每天一條路線，分開存起來才能跟著日期篩選單獨顯示
             routeLayer = L.layerGroup().addTo(map);
             mappedDays.forEach(d => {
                 if (d.places.length < 2) return;
-                L.polyline(d.places.map(p => [p.lat, p.lng]), {
+                dayRoutes[d.day] = L.polyline(d.places.map(p => [p.lat, p.lng]), {
                     color: dayColors[d.day - 1],
                     weight: 3,
                     opacity: 0.55,
@@ -2125,6 +2092,15 @@
             });
 
             mapInitialized = true;
+
+            // 日期篩選列：優先還原上次看的那天；第一次進來的話，
+            // 旅程期間直接顯示今天（那才是當下真正需要的），平常則顯示全部
+            buildMapDays();
+            const savedDay = loadState().mapDay;
+            const todayHasPlaces = todayDay && (itinerary[todayDay - 1].places || []).length > 0;
+            showMapDay(savedDay === 'all' || typeof savedDay === 'number'
+                ? savedDay
+                : (todayHasPlaces ? todayDay : 'all'));
 
             // 還原上次的鐵道圖層開關
             if (loadState().rail) toggleRail(true);
