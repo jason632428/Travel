@@ -469,7 +469,15 @@
 
     <!-- ========== 出發前重點 ========== -->
     <div class="memo-card" role="note">
-        <div class="memo-title">💡 打包大原則</div>
+        <button class="ref-head" onclick="toggleRef(this)" aria-expanded="false">
+            <span class="ref-title">💡 打包大原則</span>
+            <span class="ref-meta">5 條</span>
+            <svg class="ref-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div class="ref-body">
+            <div class="ref-body-inner">
         <ul class="memo-list">
             <li><strong>天氣：</strong>8 月東京・橫濱約 <strong>30–36°C</strong>、濕度高，白天以排汗透氣衣物為主；室內與電車冷氣強，隨身一件薄外套。</li>
             <li><strong>少帶多買：</strong>盥洗用品飯店都有、藥妝當地更便宜，去程行李箱留 <strong>1/3 空間</strong>給採購。</li>
@@ -477,6 +485,8 @@
             <li><strong>走路量大：</strong>鎌倉、江之島、橫濱步行多，好走的鞋與水泡貼是必需品，不是加分品。</li>
             <li><strong>分散風險：</strong>護照影本、現金、信用卡分兩個包放，家人之間互相備份。</li>
         </ul>
+            </div>
+        </div>
     </div>
 
     <!-- ========== 清單區塊 ========== -->
@@ -790,6 +800,16 @@
 
             container.appendChild(card);
         });
+
+        // 參考資料卡的展開／收合（與行程頁同一套）
+        function toggleRef(btn) {
+            const body = btn.nextElementSibling;
+            const chev = btn.querySelector('.ref-chevron');
+            const open = !chev.classList.contains('open');
+            body.style.maxHeight = open ? body.scrollHeight + 'px' : '';
+            chev.classList.toggle('open', open);
+            btn.setAttribute('aria-expanded', String(open));
+        }
 
         // ========== Section collapse ==========
         function setSectionOpen(secId, open) {

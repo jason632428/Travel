@@ -233,6 +233,59 @@ body {
     color: var(--gray-700);
 }
 
+/* ========== 參考資料卡（備忘錄／已預訂資訊）==========
+   這兩張是「出發前看一次」與「需要時才查」的內容，原本佔掉 1175px，
+   把每日行程推到第 1.8 屏才看得到；改成預設收合，只留標題列。 */
+.ref-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ref-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--gray-800);
+}
+
+.ref-meta {
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gray-500);
+    white-space: nowrap;
+}
+
+.ref-chevron {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    color: var(--gray-400);
+    transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.ref-chevron.open {
+    transform: rotate(180deg);
+}
+
+.ref-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ref-body-inner {
+    padding-top: 12px;
+}
+
 /* ========== Bottom Navigation (floating glass pill) ========== */
 .bottom-nav {
     position: fixed;

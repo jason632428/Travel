@@ -58,59 +58,6 @@
             border-image-slice: 1;
         }
 
-        /* ========== 參考資料卡（備忘錄／已預訂資訊）==========
-           這兩張是「出發前看一次」與「需要時才查」的內容，原本佔掉 1175px，
-           把每日行程推到第 1.8 屏才看得到；改成預設收合，只留標題列。 */
-        .ref-head {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 0;
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-family: var(--font-sans);
-            text-align: left;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .ref-title {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--gray-800);
-        }
-
-        .ref-meta {
-            margin-left: auto;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--gray-500);
-            white-space: nowrap;
-        }
-
-        .ref-chevron {
-            width: 17px;
-            height: 17px;
-            flex-shrink: 0;
-            color: var(--gray-400);
-            transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
-        }
-
-        .ref-chevron.open {
-            transform: rotate(180deg);
-        }
-
-        .ref-body {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .ref-body-inner {
-            padding-top: 12px;
-        }
-
         /* ========== Booking Card ========== */
         .booking-card {
             margin: 0 16px 16px;
@@ -1244,7 +1191,7 @@
     <main id="view-itinerary" class="view active">
         <!-- Sticky toolbar: search + quick day jump -->
         <div class="trip-toolbar">
-            <div class="trip-search" id="trip-search">
+            <label class="trip-search" id="trip-search" for="search-input">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                     stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
@@ -1252,7 +1199,7 @@
                 </svg>
                 <input type="text" id="search-input" placeholder="搜尋景點、地名或行程…" autocomplete="off">
                 <button class="clear-btn" id="search-clear" onclick="clearSearch()" aria-label="清除搜尋">✕</button>
-            </div>
+            </label>
             <div class="date-strip" id="date-strip"></div>
         </div>
 
