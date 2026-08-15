@@ -9,6 +9,7 @@
 
     <!-- 閒置時先抓好行李頁，按下導覽鍵才不會等 -->
     <link rel="prefetch" href="luggage.html">
+    <link rel="prefetch" href="tickets.html">
 
     <!-- 加到手機主畫面（PWA） -->
     <link rel="manifest" href="manifest.webmanifest">
@@ -1459,6 +1460,15 @@
                 </svg>
                 <span>行李</span>
             </a>
+
+            <a href="tickets.html" class="nav-btn" onclick="navPress(this, 4)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z">
+                    </path>
+                </svg>
+                <span>票券</span>
+            </a>
         </div>
     </nav>
 
@@ -1860,7 +1870,7 @@
 
             // Slide the gradient pill to the active tab
             // 用整個 className 設定，順便清掉 navPress 可能留下的 far-right
-            pill.className = 'nav-pill' + (tab === 'map' ? ' right' : '');
+            pill.className = 'nav-pill' + (tab === 'map' ? ' p2' : '');
 
             // Lazy-init map
             if (tab === 'map') {
@@ -1879,7 +1889,7 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             const pill = document.getElementById('nav-pill');
-            if (pill) pill.className = 'nav-pill' + (pos === 2 ? ' right' : pos === 3 ? ' far-right' : '');
+            if (pill) pill.className = 'nav-pill' + (pos > 1 ? ' p' + pos : '');
         }
 
         // ========== Cross-link: itinerary → map ==========

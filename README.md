@@ -9,6 +9,7 @@
 |---|---|
 | `index.html` | 行程總覽 + 地圖與交通（Leaflet） |
 | `luggage.html` | 行李打包清單（87 項，可勾選） |
+| `tickets.html` | 票券（晴空塔 QR + NEX 換票資訊）**已加密，需密碼** |
 | `shared.css` | 兩頁共用樣式：設計 token、標頭、底部導覽、深色模式 |
 | `manifest.webmanifest`、`icon-*.png` | 加到手機主畫面用 |
 
@@ -38,9 +39,20 @@ const tripDayDate = (day) => new Date(2026, 7, 16 + day);   // Day 1 = 2026-08-1
 **行李清單：`luggage.html` 的 `packSections` 陣列。**
 項目可以是字串，或 `{ t: '主文字', h: '補充說明' }`。有 `tips` 的區塊不含勾選框。
 
+## 票券頁
+
+`tickets.html` 裡是 AES-GCM 加密後的密文，金鑰用 PBKDF2-SHA256 迭代 60 萬次由密碼導出，
+解密全部在瀏覽器端做。**repo 裡沒有任何明文票券資料**。
+
+密碼不在這個專案裡，也沒有任何地方存著它——弄丟就打不開，只能用原始 PDF 重新產生一份。
+
+要更新票券內容時，用（不在 repo 裡的）`tickets-lock.html` 重新加密產生。
+**明文版的 `tickets.html` 千萬不要複製進這個目錄**，它會覆蓋加密版並且一旦推上去就等於公開票券。
+`.gitignore` 已擋掉 `tickets-lock.html` 與 `tickets-secure.html`，但同名的 `tickets.html` 擋不掉。
+
 ## 狀態儲存
 
-兩頁共用 localStorage 的 `tokyo-trip-state-v1`：深色模式、目前分頁、展開的行程卡片、導航交通方式、鐵道圖層開關、行李勾選項目。清除瀏覽器資料就會回到預設。
+三頁共用 localStorage 的 `tokyo-trip-state-v1`：深色模式、目前分頁、展開的行程卡片、導航交通方式、鐵道圖層開關、行李勾選項目。票券的「已使用」標記另存在 `tokyo-tickets-used-v1`。清除瀏覽器資料就會回到預設。
 
 ## 外部依賴
 

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>票券（已加密）· 家族東京9日遊</title>
+    <meta name="description" content="晴空塔入場票與 NEX 成田特快換票資訊">
+
+    <link rel="prefetch" href="index.html">
+    <link rel="prefetch" href="luggage.html">
+
+    <!-- 加到手機主畫面（PWA） -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="icon" href="icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="東京9日">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- 與行程頁共用的樣式（設計 token、標頭、底部導覽、深色模式） -->
+    <link rel="stylesheet" href="shared.css">
+
+    <style>
+        /* ========== Header（本頁專屬：票券圖示動畫）========== */
+        .header-title .icon-ticket {
+            display: inline-block;
+            animation: tilt 3.2s ease-in-out infinite;
+        }
+
+        @keyframes tilt {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(-4deg);
+            }
+
+            50% {
+                transform: translateY(-4px) rotate(4deg);
+            }
+        }
+
+        main {
+            padding: 18px 16px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* ========== 票卡 ==========
+           QR 一定要白底高對比，讀取機才掃得到，所以這張卡不跟著深色模式變。 */
+        .ticket-card {
+            width: 100%;
+            max-width: 420px;
+            background: #fff;
+            border-radius: 22px;
+            padding: 18px 18px 16px;
+            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.22), 0 2px 8px rgba(0, 0, 0, 0.06);
+            animation: slideUp 0.45s ease-out both;
+        }
+
+        .tk-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .tk-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #fff;
+            padding: 4px 11px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .tk-seq {
+            margin-left: auto;
+            font-family: var(--font-display);
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #94a3b8;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .qr-wrap {
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* QR 原圖是 145px 點陣圖，用 pixelated 放大才不會被平滑成糊的 */
+        .qr {
+            width: min(70vw, 46vh, 340px);
+            height: min(70vw, 46vh, 340px);
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        .used-veil {
+            position: absolute;
+            inset: -6px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #16a34a;
+            border-radius: 16px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 4px;
+            color: #16a34a;
+            font-weight: 800;
+        }
+
+        .used-veil span {
+            font-size: 2.2rem;
+            line-height: 1;
+        }
+
+        .is-used .used-veil {
+            display: flex;
+        }
+
+        .tk-foot {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px dashed #e2e8f0;
+            text-align: center;
+        }
+
+        .tk-code {
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #1e293b;
+        }
+
+        .tk-sub {
+            font-size: 0.76rem;
+            color: #64748b;
+            line-height: 1.7;
+            margin-top: 3px;
+        }
+
+        /* ========== 控制列 ========== */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .ctl {
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            color: var(--gray-700);
+            border-radius: 14px;
+            padding: 14px 0;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .ctl:active {
+            transform: scale(0.96);
+        }
+
+        .ctl.arrow {
+            flex: 0 0 62px;
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        .ctl.use {
+            flex: 1;
+        }
+
+        .ctl.use.on {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        /* ========== 圓點 ========== */
+        .dots {
+            display: flex;
+            justify-content: center;
+            gap: 7px;
+            flex-wrap: wrap;
+            max-width: 420px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gray-300);
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .dot.on {
+            background: var(--primary-500);
+            transform: scale(1.35);
+        }
+
+        .dot.used {
+            background: #16a34a;
+        }
+
+        .hint {
+            font-size: 0.74rem;
+            color: var(--gray-500);
+            line-height: 1.7;
+            text-align: center;
+            max-width: 420px;
+            padding-bottom: 8px;
+        }
+
+        /* ========== NEX 換票卡 ========== */
+        .nex {
+            display: none;
+            width: 100%;
+            max-width: 420px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 22px;
+            box-shadow: var(--glass-shadow);
+            padding: 18px;
+            animation: slideUp 0.45s ease-out both;
+        }
+
+        .nex.show {
+            display: block;
+        }
+
+        .nex h2 {
+            font-size: 1rem;
+            color: var(--gray-800);
+        }
+
+        .nex .warn {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.28);
+            color: #dc2626;
+            border-radius: 12px;
+            padding: 12px 13px;
+            font-size: 0.8rem;
+            line-height: 1.75;
+            margin: 10px 0 14px;
+        }
+
+        body.dark .nex .warn {
+            color: #fca5a5;
+        }
+
+        .nex .big-code {
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-500), var(--accent-violet));
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 14px;
+            color: #fff;
+        }
+
+        .nex .big-code span {
+            display: block;
+            font-size: 0.7rem;
+            opacity: 0.85;
+            letter-spacing: 1px;
+        }
+
+        .nex .big-code b {
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 2.1rem;
+            letter-spacing: 4px;
+        }
+
+        .nex table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .nex th,
+        .nex td {
+            border-bottom: 1px solid var(--glass-border);
+            padding: 8px 6px;
+            text-align: left;
+            color: var(--gray-700);
+        }
+
+        .nex th {
+            font-size: 0.7rem;
+            color: var(--gray-500);
+            font-weight: 700;
+        }
+
+        .nex td.no {
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 0.72rem;
+            color: var(--gray-600);
+        }
+
+        .nex .route {
+            margin-top: 12px;
+            font-size: 0.76rem;
+            color: var(--gray-500);
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .hide {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <style>
+        #lock {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: linear-gradient(180deg, #eef2ff 0%, #fdf2f8 40%, #f0f9ff 100%);
+        }
+
+        body.dark #lock {
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b2e 45%, #0c1a2b 100%);
+        }
+
+        #lock .box {
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 22px;
+            box-shadow: var(--glass-shadow);
+            padding: 30px 22px 24px;
+            animation: slideUp 0.5s ease-out both;
+        }
+
+        #lock .ico {
+            font-size: 2.4rem;
+            line-height: 1;
+        }
+
+        #lock h1 {
+            font-size: 1.05rem;
+            color: var(--gray-800);
+            margin: 12px 0 6px;
+        }
+
+        #lock p.tip {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+            line-height: 1.7;
+            margin-bottom: 18px;
+        }
+
+        #lock input {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            font-family: inherit;
+            color: var(--gray-800);
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            text-align: center;
+        }
+
+        body.dark #lock input {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        #lock button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: inherit;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--primary-500), var(--accent-violet) 60%, var(--accent-pink));
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+        }
+
+        #lock button:active {
+            transform: scale(0.97);
+        }
+
+        #lock button:disabled {
+            opacity: 0.6;
+        }
+
+        #lock .err {
+            font-size: 0.8rem;
+            color: #dc2626;
+            margin-top: 12px;
+            min-height: 1.2em;
+        }
+    </style>
+    <div id="lock">
+        <div class="box">
+            <div class="ico">&#128274;</div>
+            <h1>票券已加密</h1>
+            <p class="tip">請輸入家人共用的密碼</p>
+            <input id="pw" type="password" inputmode="text" autocomplete="off" placeholder="密碼">
+            <button onclick="unlock()" id="unlock-btn">解鎖</button>
+            <p class="err" id="lock-msg"></p>
+        </div>
+    </div>
+
+    <script>
+        // 在首次繪製前套用主題，避免換頁時閃一下白底
+        try {
+            var _s = JSON.parse(localStorage.getItem('tokyo-trip-state-v1')) || {};
+            var _dark = typeof _s.dark === 'boolean' ? _s.dark
+                : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (_dark) document.body.classList.add('dark');
+        } catch (e) { /* localStorage 不可用就照原本流程 */ }
+    </script>
+
+    <header class="app-header">
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="切換深色／淺色"
+            aria-label="切換深色／淺色模式">
+            <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"></svg>
+        </button>
+        <h1 class="header-title"><span class="icon-ticket">&#127915;</span> 票券</h1>
+        <p class="header-subtitle">晴空塔入場券 · NEX 成田特快</p>
+        <div class="trip-status" id="trip-status"></div>
+    </header>
+
+    <main>
+        <div class="ticket-card" id="ticket-card">
+            <div class="tk-top">
+                <span class="tk-badge" id="tk-badge"></span>
+                <span class="tk-seq" id="tk-seq"></span>
+            </div>
+            <div class="qr-wrap" id="qr-wrap">
+                <img class="qr" id="qr" alt="票券 QR Code">
+                <div class="used-veil"><span>&#10003;</span>已使用</div>
+            </div>
+            <div class="tk-foot">
+                <div class="tk-code" id="tk-code"></div>
+                <div class="tk-sub" id="tk-sub"></div>
+            </div>
+        </div>
+
+        <div class="nex" id="nex">
+            <h2>&#128644; NEX 成田特快（8/25）</h2>
+            <div class="warn">
+                <b>這張不能直接刷進站。</b>要先在橫濱站的售票機或綠色窗口，
+                用下面的受取コード把 6 張都換成實體車票，才能搭車。
+                09:28 發車，請至少提早 30 分鐘到站排隊換票。
+            </div>
+            <div class="big-code"><span>受取コード / RECEIVING CODE</span><b id="nex-code"></b></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>座位</th>
+                        <th>予約番号</th>
+                    </tr>
+                </thead>
+                <tbody id="nex-rows"></tbody>
+            </table>
+            <p class="route" id="nex-info"></p>
+        </div>
+
+        <div class="controls">
+            <button class="ctl arrow" onclick="go(-1)" aria-label="上一張">&#8249;</button>
+            <button class="ctl use" id="use-btn" onclick="toggleUsed()">標記為已使用</button>
+            <button class="ctl arrow" onclick="go(1)" aria-label="下一張">&#8250;</button>
+        </div>
+
+        <div class="dots" id="dots"></div>
+
+        <p class="hint">掃描前把螢幕亮度調到最亮 · 左右滑動可換票 · 標記狀態存在這支手機上</p>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主選單">
+        <div class="nav-container">
+            <div class="nav-pill p4" id="nav-pill"></div>
+
+            <a href="index.html" class="nav-btn" onclick="navPress(this, 1)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                    </path>
+                </svg>
+                <span>行程</span>
+            </a>
+
+            <a href="index.html?view=map" class="nav-btn" onclick="navPress(this, 2)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
+                    </path>
+                </svg>
+                <span>地圖</span>
+            </a>
+
+            <a href="luggage.html" class="nav-btn" onclick="navPress(this, 3)">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 6V4.5A1.5 1.5 0 0110.5 3h3A1.5 1.5 0 0115 4.5V6m-9 0h12a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2zm4 3v8m4-8v8">
+                    </path>
+                </svg>
+                <span>行李</span>
+            </a>
+
+            <a href="tickets.html" class="nav-btn active" aria-current="page">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z">
+                    </path>
+                </svg>
+                <span>票券</span>
+            </a>
+        </div>
+    </nav>
+
+    <script>
+        let TICKETS = [], NEX = [], NEXINFO = {};
+        const KEY = 'tokyo-tickets-used-v1';
+
+        let used = new Set();
+        try { used = new Set(JSON.parse(localStorage.getItem(KEY)) || []); } catch (e) { }
+        const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...used])); } catch (e) { } };
+
+        // 最後一頁是 NEX 換票資訊（沒有 QR，要換票）
+        // total 依賴票券資料，放到 boot() 才算：加密版載入時還沒解密
+        let total = 1, idx = 0;
+
+        // 跨頁的導覽鍵：按下當下先把膠囊滑過去，換頁需要時間，不能讓使用者以為沒按到
+        function navPress(btn, pos) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const pill = document.getElementById('nav-pill');
+            if (pill) pill.className = 'nav-pill' + (pos > 1 ? ' p' + pos : '');
+        }
+
+        function show(i) {
+            idx = (i + total) % total;
+            const isNex = idx === TICKETS.length;
+
+            document.getElementById('nex').classList.toggle('show', isNex);
+            document.getElementById('ticket-card').classList.toggle('hide', isNex);
+            document.getElementById('use-btn').classList.toggle('hide', isNex);
+
+            if (!isNex) {
+                const t = TICKETS[idx];
+                document.getElementById('qr').src = 'data:image/png;base64,' + t.qr;
+                const badge = document.getElementById('tk-badge');
+                badge.textContent = t.kind;
+                badge.style.background = t.color;
+                document.getElementById('tk-seq').textContent = (idx + 1) + ' / ' + total;
+                document.getElementById('tk-code').textContent = t.code;
+                document.getElementById('tk-sub').innerHTML =
+                    t.label + ' · ' + t.price + '<br>2026-08-18 17:30&#8211;18:00 入場 · 晴空塔 4 樓';
+
+                const on = used.has(t.id);
+                document.getElementById('qr-wrap').classList.toggle('is-used', on);
+                const btn = document.getElementById('use-btn');
+                btn.classList.toggle('on', on);
+                btn.textContent = on ? '\u2713 已使用（點一下取消）' : '標記為已使用';
+            }
+
+            document.querySelectorAll('.dot').forEach((d, i2) => {
+                d.classList.toggle('on', i2 === idx);
+                d.classList.toggle('used', i2 < TICKETS.length && used.has(TICKETS[i2].id));
+            });
+        }
+
+        const go = (step) => show(idx + step);
+
+        function toggleUsed() {
+            const t = TICKETS[idx];
+            if (!t) return;
+            used.has(t.id) ? used.delete(t.id) : used.add(t.id);
+            save();
+            show(idx);
+        }
+
+        // ===== 深色／淺色（與其他頁共用同一個設定）=====
+        const SUN_ICON = '<circle cx="12" cy="12" r="5"></circle>' +
+            '<line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>' +
+            '<line x1="4.2" y1="4.2" x2="5.6" y2="5.6"></line><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"></line>' +
+            '<line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>' +
+            '<line x1="4.2" y1="19.8" x2="5.6" y2="18.4"></line><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"></line>';
+        const MOON_ICON = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>';
+
+        function applyTheme(dark) {
+            document.body.classList.toggle('dark', dark);
+            const ic = document.getElementById('theme-icon');
+            if (ic) ic.innerHTML = dark ? MOON_ICON : SUN_ICON;
+        }
+
+        function toggleTheme() {
+            const dark = !document.body.classList.contains('dark');
+            applyTheme(dark);
+            try {
+                const s = JSON.parse(localStorage.getItem('tokyo-trip-state-v1')) || {};
+                s.dark = dark;
+                localStorage.setItem('tokyo-trip-state-v1', JSON.stringify(s));
+            } catch (e) { }
+        }
+
+        function updateTripStatus() {
+            const el = document.getElementById('trip-status');
+            if (!el) return;
+            const today = new Date();
+            const d = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const skytree = new Date(2026, 7, 18);
+            const days = Math.round((skytree - d) / 86400000);
+            el.textContent = days > 0 ? '晴空塔入場還有 ' + days + ' 天'
+                : days === 0 ? '今天就是晴空塔入場日' : '晴空塔 8/18 · NEX 8/25';
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') go(-1);
+            if (e.key === 'ArrowRight') go(1);
+        });
+
+        let x0 = null;
+        document.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+        document.addEventListener('touchend', e => {
+            if (x0 === null) return;
+            const dx = e.changedTouches[0].clientX - x0;
+            if (Math.abs(dx) > 45) go(dx < 0 ? 1 : -1);
+            x0 = null;
+        }, { passive: true });
+
+        // 所有依賴票券資料的初始化都集中在這裡。
+        // 明文版直接跑；加密版把最後那行 boot() 拿掉，改成解密成功後才呼叫。
+        function boot() {
+            total = TICKETS.length + 1;
+
+            // 受取コード與班次由 JS 注入，不寫死在 HTML 裡（加密版才不會漏明文）
+            document.getElementById('nex-code').textContent = NEXINFO.code;
+            document.getElementById('nex-info').textContent =
+                NEXINFO.route + ' · ' + NEXINFO.train + ' · ' + NEXINFO.car + ' · 每張 ' + NEXINFO.price;
+
+            document.getElementById('nex-rows').innerHTML =
+                NEX.map(r => '<tr><td><b>' + r.seat + '</b></td><td class="no">' + r.no + '</td></tr>').join('');
+
+            document.getElementById('dots').innerHTML =
+                Array.from({ length: total }, (_, i) => '<div class="dot" onclick="show(' + i + ')"></div>').join('');
+
+            show(0);
+        }
+
+        applyTheme(document.body.classList.contains('dark'));
+        updateTripStatus();
+
+        // ===== 密碼解鎖：AES-GCM + PBKDF2(SHA-256, 600k)，全部在裝置上算，密碼不會離開這頁 =====
+        const PAYLOAD = {"salt":"MwYoZXPnHuclrE74xtSr0A==","iv":"Hty79GDwoB0Wkmd/","iter":600000,"data":"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"};
+        const b64d = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+        async function unlock() {
+            const btn = document.getElementById('unlock-btn');
+            const msg = document.getElementById('lock-msg');
+            const pw = document.getElementById('pw').value;
+            if (!pw) { msg.textContent = '請輸入密碼'; return; }
+
+            btn.disabled = true; btn.textContent = '解密中…'; msg.textContent = '';
+            try {
+                const enc = new TextEncoder();
+                const base = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
+                const key = await crypto.subtle.deriveKey(
+                    { name: 'PBKDF2', salt: b64d(PAYLOAD.salt), iterations: PAYLOAD.iter, hash: 'SHA-256' },
+                    base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+                const plain = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: b64d(PAYLOAD.iv) }, key, b64d(PAYLOAD.data));
+                const data = JSON.parse(new TextDecoder().decode(plain));
+
+                TICKETS = data.tickets; NEX = data.nex; NEXINFO = data.nexinfo;
+                document.getElementById('lock').remove();
+                boot();
+            } catch (e) {
+                msg.textContent = '密碼錯誤';
+                btn.disabled = false; btn.textContent = '解鎖';
+            }
+        }
+
+        document.getElementById('pw').addEventListener('keydown',
+            e => { if (e.key === 'Enter') unlock(); });
+    </script>
+</body>
+
+</html>

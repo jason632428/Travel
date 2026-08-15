@@ -278,7 +278,7 @@ body {
     top: 0;
     bottom: 0;
     left: 0;
-    width: calc((100% - 12px) / 3);
+    width: calc((100% - 18px) / 4);
     border-radius: 999px;
     background: linear-gradient(135deg, var(--primary-500), var(--accent-violet) 60%, var(--accent-pink));
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
@@ -294,12 +294,17 @@ body {
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), transparent 55%);
 }
 
-.nav-pill.right {
+/* 膠囊落在第幾格（第 1 格不用 class） */
+.nav-pill.p2 {
     transform: translateX(calc(100% + 6px));
 }
 
-.nav-pill.far-right {
+.nav-pill.p3 {
     transform: translateX(calc(200% + 12px));
+}
+
+.nav-pill.p4 {
+    transform: translateX(calc(300% + 18px));
 }
 
 .nav-btn {
@@ -356,13 +361,20 @@ body {
 }
 
 /* 三個分頁在窄螢幕上要塞得下 */
-@media (max-width: 370px) {
+@media (max-width: 400px) {
     .nav-btn {
         gap: 4px;
     }
 
     .nav-btn span {
-        font-size: 0.68rem;
+        font-size: 0.66rem;
+    }
+}
+
+/* 真的很窄的機型就只留圖示 */
+@media (max-width: 330px) {
+    .nav-btn span {
+        display: none;
     }
 }
 

@@ -1,0 +1,7 @@
+# 明文票券工具與中繼檔：含真實 QR 與受取コード，絕對不能進公開 repo
+tickets-lock.html
+tickets-secure.html
+_ticketdata.json
+
+# 視覺測試用的暫存頁
+_uitest_*.html
