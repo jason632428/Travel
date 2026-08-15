@@ -1,0 +1,43 @@
+#!/bin/sh
+# 防止明文票券被 commit 進這個「公開」repo。
+#
+# 由來：Downloads 裡的明文票夾也叫 tickets.html，一旦複製進來就會覆蓋加密版，
+# .gitignore 擋不掉同名檔案，推上去等於公開所有票券 QR 與受取コード。
+#
+# 這個檔案在 .git/hooks/ 底下，不會被 push；重新 clone 之後要重新安裝。
+# 真的要略過：git commit --no-verify
+
+fail() {
+    echo ""
+    echo "  ✋ COMMIT 已擋下：$1"
+    echo ""
+    echo "  這個 repo 是公開的，票券 QR 推上去等於把票送給所有人。"
+    echo "  tickets.html 必須是 tickets-lock.html 產生的「加密版」。"
+    echo ""
+    echo "  確定沒問題才略過： git commit --no-verify"
+    echo ""
+    exit 1
+}
+
+# 1) 任何文字檔都不該內嵌 base64 PNG —— 明文票夾的 QR 就是這樣存的
+for f in $(git diff --cached --name-only --diff-filter=ACM); do
+    case "$f" in
+        *.png | *.jpg | *.jpeg | *.ico | *.webp) continue ;;
+        # 這支腳本自己就寫著那個特徵字串，不能檢查自己
+        hooks/pre-commit) continue ;;
+    esac
+    if git show ":$f" 2>/dev/null | grep -q 'iVBORw0KGgo'; then
+        fail "$f 內嵌了 base64 PNG（很可能是票券 QR）"
+    fi
+done
+
+# 2) tickets.html 一定要是加密版
+if git diff --cached --name-only --diff-filter=ACM | grep -qx 'tickets.html'; then
+    content=$(git show :tickets.html)
+    echo "$content" | grep -q 'const PAYLOAD' \
+        || fail "tickets.html 沒有加密 payload（看起來是明文版）"
+    echo "$content" | grep -q 'let TICKETS = \[\], NEX = \[\], NEXINFO = {};' \
+        || fail "tickets.html 的資料不是解密後注入（看起來是明文版）"
+fi
+
+exit 0

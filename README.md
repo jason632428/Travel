@@ -12,6 +12,7 @@
 | `tickets.html` | 票券（晴空塔 QR + NEX 換票資訊）**已加密，需密碼** |
 | `shared.css` | 兩頁共用樣式：設計 token、標頭、底部導覽、深色模式 |
 | `manifest.webmanifest`、`icon-*.png` | 加到手機主畫面用 |
+| `hooks/pre-commit` | 擋下明文票券的 git hook（需手動安裝，見下） |
 
 ## 改資料的地方
 
@@ -47,8 +48,20 @@ const tripDayDate = (day) => new Date(2026, 7, 16 + day);   // Day 1 = 2026-08-1
 密碼不在這個專案裡，也沒有任何地方存著它——弄丟就打不開，只能用原始 PDF 重新產生一份。
 
 要更新票券內容時，用（不在 repo 裡的）`tickets-lock.html` 重新加密產生。
-**明文版的 `tickets.html` 千萬不要複製進這個目錄**，它會覆蓋加密版並且一旦推上去就等於公開票券。
-`.gitignore` 已擋掉 `tickets-lock.html` 與 `tickets-secure.html`，但同名的 `tickets.html` 擋不掉。
+
+### 防止明文票券外流
+
+`.gitignore` 擋得掉 `tickets-lock.html`、`tickets-secure.html`，但**擋不掉同名的 `tickets.html`**，
+所以另外裝了一個 pre-commit hook 做把關，它會擋下：
+
+- 任何文字檔內嵌 base64 PNG（明文票夾的 QR 就是這樣存的）
+- `tickets.html` 不是加密版（沒有 `PAYLOAD`，或資料不是解密後注入）
+
+hook 放在 `.git/hooks/` 底下**不會被 push**，重新 clone 之後要自己裝回來：
+
+```bash
+cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+```
 
 ## 狀態儲存
 
