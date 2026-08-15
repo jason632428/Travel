@@ -425,6 +425,15 @@
             opacity: 0.6;
         }
 
+        /* 解密要跑 60 萬次迭代、等 1–2 秒，成功後讓鎖畫面淡出退開，
+           而不是瞬間消失——這一刻需要「開了」的完成感 */
+        #lock.unlocked {
+            opacity: 0;
+            transform: scale(1.04);
+            transition: opacity 0.32s ease, transform 0.32s ease;
+            pointer-events: none;
+        }
+
         #lock .err {
             font-size: 0.8rem;
             color: #dc2626;
@@ -623,6 +632,10 @@
 
         function toggleTheme() {
             const dark = !document.body.classList.contains('dark');
+            // 只有按下切換時才過渡；首次載入套用主題不需要動畫
+            const root = document.documentElement;
+            root.classList.add('theme-anim');
+            setTimeout(() => root.classList.remove('theme-anim'), 320);
             applyTheme(dark);
             try {
                 const s = JSON.parse(localStorage.getItem('tokyo-trip-state-v1')) || {};
@@ -708,8 +721,11 @@
                 const data = JSON.parse(new TextDecoder().decode(plain));
 
                 TICKETS = data.tickets; NEX = data.nex; NEXINFO = data.nexinfo;
-                document.getElementById('lock').remove();
                 boot();
+                // 票券已經在底下畫好了，鎖畫面再淡出，銜接才順
+                const lock = document.getElementById('lock');
+                lock.classList.add('unlocked');
+                lock.addEventListener('transitionend', () => lock.remove(), { once: true });
             } catch (e) {
                 msg.textContent = '密碼錯誤';
                 btn.disabled = false; btn.textContent = '解鎖';

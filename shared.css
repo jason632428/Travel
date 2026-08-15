@@ -429,6 +429,16 @@ body {
     }
 }
 
+/* ========== 主題切換的顏色過渡 ==========
+   深色／淺色是整頁翻轉，瞬間變色很衝擊。切換當下才掛上這個 class，
+   0.28 秒後移除——平常不留任何 transition，才不會拖累其他互動。
+   地圖圖磚排除在外：它本來就有自己的濾鏡，一起過渡會變成一團糊。 */
+.theme-anim,
+.theme-anim *:not(.leaflet-tile):not(.leaflet-tile-pane) {
+    transition: background-color 0.28s ease, color 0.28s ease,
+        border-color 0.28s ease, box-shadow 0.28s ease !important;
+}
+
 /* ========== Animations ========== */
 @keyframes slideUp {
     from {
@@ -463,4 +473,19 @@ body.dark {
 
 body.dark .bottom-nav {
     background: rgba(15, 23, 42, 0.9);
+}
+
+/* ========== 減少動態效果 ==========
+   系統開啟「減少動態效果」時（前庭功能敏感、容易暈的使用者），
+   關掉所有動畫與過渡，只保留最低限度的狀態變化。 */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

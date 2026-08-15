@@ -2075,6 +2075,10 @@
         }
         function toggleTheme() {
             const dark = !document.body.classList.contains('dark');
+            // 只有按下切換時才過渡；首次載入套用主題不需要動畫
+            const root = document.documentElement;
+            root.classList.add('theme-anim');
+            setTimeout(() => root.classList.remove('theme-anim'), 320);
             applyTheme(dark);
             saveState({ dark });
             if (mapInitialized && map) setTimeout(() => map.invalidateSize(), 50);

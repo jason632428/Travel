@@ -223,6 +223,23 @@
         .pack-badge.done {
             background: rgba(34, 197, 94, 0.16);
             color: #16a34a;
+            /* 整個區塊打包完成時給一下回饋，class 加上時只播一次 */
+            animation: badgePop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes badgePop {
+
+            0% {
+                transform: scale(1);
+            }
+
+            45% {
+                transform: scale(1.18);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         .pack-chevron {
@@ -915,6 +932,10 @@
         }
         function toggleTheme() {
             const dark = !document.body.classList.contains('dark');
+            // 只有按下切換時才過渡；首次載入套用主題不需要動畫
+            const root = document.documentElement;
+            root.classList.add('theme-anim');
+            setTimeout(() => root.classList.remove('theme-anim'), 320);
             applyTheme(dark);
             saveState({ dark });
         }
