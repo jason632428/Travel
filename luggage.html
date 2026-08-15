@@ -923,6 +923,15 @@
             saveState({ dark });
         }
 
+
+        // 手機按返回鍵常會從 bfcache 還原頁面，DOM 狀態被保留，
+        // 導覽膠囊會停在離開前按下的那一格，跟實際所在頁面對不上
+        window.addEventListener('pageshow', e => {
+            if (!e.persisted) return;
+            document.querySelectorAll('.nav-btn').forEach(b =>
+                b.classList.toggle('active', b.hasAttribute('aria-current')));
+            document.getElementById('nav-pill').className = 'nav-pill p3';
+        });
         // ========== Boot ==========
         (function boot() {
             const s = loadState();

@@ -2272,6 +2272,14 @@
         }
         window.addEventListener('resize', setHeaderHeight);
 
+
+        // 手機按返回鍵常會從 bfcache 還原頁面，DOM 狀態被保留，
+        // 導覽膠囊會停在離開前按下的那一格（例如點了「行李」就停在第三格）
+        window.addEventListener('pageshow', e => {
+            if (!e.persisted) return;
+            switchTab(document.getElementById('view-map').classList.contains('active') ? 'map' : 'itinerary');
+        });
+
         // ========== Boot ==========
         (function boot() {
             setHeaderHeight();
@@ -2292,7 +2300,14 @@
 
             // ?view=map (從行李頁的「地圖」導覽進來) 優先，其次才還原上次的分頁
             const wantMap = new URLSearchParams(location.search).get('view') === 'map';
-            if (wantMap || s.tab === 'map') switchTab('map');
+            if (wantMap || s.tab === 'map') {
+                // 一進來就在地圖分頁，膠囊直接放到第二格，不要播那段滑動
+                const pill = document.getElementById('nav-pill');
+                pill.style.transition = 'none';
+                switchTab('map');
+                pill.offsetHeight;              // 強制 reflow，讓 transition:none 生效
+                pill.style.transition = '';
+            }
 
             // Auto-scroll to today's card during the trip
             if (todayDay) {
